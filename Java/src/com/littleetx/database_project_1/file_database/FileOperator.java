@@ -100,7 +100,7 @@ public abstract class FileOperator {
         deleteRows(new int[]{columnIndices}, new String[]{value});
     }
 
-    public void deleteRows(int @NotNull [] columnIndices, String @NotNull [] values) {
+    public void deleteRows(int @NotNull [] columnIndices, @Nullable String @NotNull [] values) {
         if (columnIndices.length == 0 || columnIndices.length != values.length) {
             throw new IllegalArgumentException(
                     "columnIndices and values must have same length");
@@ -139,7 +139,7 @@ public abstract class FileOperator {
         return findRowsSatisfied(new int[]{columnIndices}, new String[]{value});
     }
 
-    public List<String[]> findRowsSatisfied(int @NotNull [] columnIndices, String @NotNull [] values) {
+    public List<String[]> findRowsSatisfied(int @NotNull [] columnIndices, @Nullable String @NotNull [] values) {
         if (columnIndices.length == 0 || columnIndices.length != values.length) {
             throw new IllegalArgumentException(
                     "columnIndices and values must have same length");
@@ -170,8 +170,12 @@ public abstract class FileOperator {
         }
     }
 
-    public void insertRows(@NotNull List<String @NotNull []> rows) {
+    public void insertRows(@NotNull List<@Nullable String @NotNull []> rows) {
+        File file = new File(filePath);
         try (FileWriter writer = new FileWriter(filePath, true)) {
+            //add separator if file is not empty
+            if (file.exists() && file.length() > 0)
+                writer.write(System.getProperty("line.separator"));
             for (int i = 0; i < rows.size(); i++) {
                 if (i != 0) {
                     writer.write(System.getProperty("line.separator"));

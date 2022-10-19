@@ -10,12 +10,15 @@ public class DatabaseType_Numeric extends DatabaseType{
     }
 
     DatabaseType_Numeric(Object value) {
-        if (value instanceof Float)
+        if (value instanceof String) {
+            this.value = new BigDecimal((String) value);
+        } else if (value instanceof Float) {
             this.value = BigDecimal.valueOf((float) value);
-        else if(value instanceof Double)
+        } else if(value instanceof Double) {
             this.value = BigDecimal.valueOf((double) value);
-        else
+        } else {
             this.value = (BigDecimal) value;
+        }
     }
 
     @Override

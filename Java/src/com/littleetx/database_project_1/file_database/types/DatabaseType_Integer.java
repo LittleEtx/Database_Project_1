@@ -7,7 +7,11 @@ public class DatabaseType_Integer extends DatabaseType {
     }
 
     DatabaseType_Integer(Object value) {
-        this.value = (Integer) value;
+        if (value instanceof String) {
+            this.value = Integer.parseInt((String) value);
+        } else {
+            this.value = (Integer) value;
+        }
     }
 
     @Override

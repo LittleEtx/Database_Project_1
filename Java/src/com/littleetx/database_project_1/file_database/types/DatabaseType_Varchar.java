@@ -7,6 +7,10 @@ public class DatabaseType_Varchar extends DatabaseType{
         this.value = (String) value;
     }
 
+    DatabaseType_Varchar(String string) {
+        this.value = string;
+    }
+
     @Override
     public String toString() {
         return value;
