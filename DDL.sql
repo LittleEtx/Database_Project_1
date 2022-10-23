@@ -37,7 +37,8 @@ create table tax_info(
 create table item(
     id int primary key ,
     name varchar,
-    price int
+    price int,
+    type varchar
 );
 
 create table route(
