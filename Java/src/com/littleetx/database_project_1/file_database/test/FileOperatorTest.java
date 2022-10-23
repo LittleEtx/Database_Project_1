@@ -21,7 +21,7 @@ public class FileOperatorTest {
                 rows.add(iterator.next());
             }
             newFile.insertRows(rows);
-            newFile.modifyRowsTo(3, "石家庄", "Shijiazhuang");
+            newFile.modifyRowsTo(3, "石家庄", 3, "Shijiazhuang");
             for (String[] foundRows : newFile.findRowsSatisfied(24, "Schwarz Group"))
                 System.out.println(foundRows[0]);
             newFile.deleteRows(new int[]{0, 1}, new String[]{"banana-99bb9", "banana"});

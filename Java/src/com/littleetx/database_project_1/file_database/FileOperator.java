@@ -52,18 +52,20 @@ public abstract class FileOperator {
     }
 
 
-    public void modifyRowsTo(int columnIndices, @Nullable String value, @Nullable String newValue) {
-        modifyRowsTo(new int[]{columnIndices}, new String[]{value}, new String[]{newValue});
+    public void modifyRowsTo(int findColumnIndex, String values,
+                             int modifyColumnIndex, String newValues) {
+        modifyRowsTo(new int[]{findColumnIndex}, new String[]{values},
+                new int[]{modifyColumnIndex}, new String[]{newValues});
     }
-    public void modifyRowsTo(int @NotNull [] columnIndices, String @NotNull [] values,
-                             String @NotNull [] newValues) {
-        if (columnIndices.length == 0 || columnIndices.length != values.length ||
-                columnIndices.length != newValues.length) {
+    public void modifyRowsTo(int @NotNull [] findColumnIndices, String @NotNull [] values,
+                             int @NotNull [] modifyColumnIndices, String @NotNull [] newValues) {
+        if (findColumnIndices.length == 0 || findColumnIndices.length != values.length ||
+                modifyColumnIndices.length == 0 || modifyColumnIndices.length != newValues.length) {
             throw new IllegalArgumentException(
-                    "columnIndices, values and newValues must have same length");
+                    "findColumnIndices, values, modifyColumnIndices and newValues must have same length");
         }
 
-        int maxIndex = getMaxIndex(columnIndices);
+        int maxIndex = getMaxIndex(findColumnIndices);
 
         try (FileWriter writer = new FileWriter(filePath + ".tmp")) {
             try(FileOperatorReader reader = getReader()) {
@@ -75,10 +77,10 @@ public abstract class FileOperator {
                     }
 
                     //modify satisfied row to new value
-                    boolean isSatisfied = isRowSatisfies(row, values, columnIndices);
+                    boolean isSatisfied = isRowSatisfies(row, findColumnIndices, values);
                     if (isSatisfied) {
-                        for (int i = 0; i < columnIndices.length; i++) {
-                            row[columnIndices[i]] = newValues[i];
+                        for (int i = 0; i < modifyColumnIndices.length; i++) {
+                            row[modifyColumnIndices[i]] = newValues[i];
                         }
                     }
                     writer.write(rowToStr(row));
@@ -116,7 +118,7 @@ public abstract class FileOperator {
                         throw new IllegalArgumentException("column index" + maxIndex + "out of table range!");
                     }
 
-                    if (!isRowSatisfies(row, values, columnIndices)) {
+                    if (!isRowSatisfies(row, columnIndices, values)) {
                         if (!hasWrittenFirstLine) {
                             hasWrittenFirstLine = true;
                         } else {
@@ -152,7 +154,7 @@ public abstract class FileOperator {
                 if (row.length <= maxIndex) {
                     throw new IllegalArgumentException("column index " + maxIndex + "out of table range!");
                 }
-                if (isRowSatisfies(row, values, columnIndices)) {
+                if (isRowSatisfies(row, columnIndices, values)) {
                     result.add(row);
                 }
             }
@@ -198,7 +200,7 @@ public abstract class FileOperator {
             throw new RuntimeException("Cannot rename new file: " + filePath + ".tmp");
         }
     }
-    private boolean isRowSatisfies(String[] row, String @NotNull [] values, int @NotNull [] columnIndices) {
+    private boolean isRowSatisfies(String[] row, int @NotNull [] columnIndices, String @NotNull [] values) {
         boolean isSatisfied = true;
         for (int i = 0; i < columnIndices.length; i++) {
             String value = row[columnIndices[i]];

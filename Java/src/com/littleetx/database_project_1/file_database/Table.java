@@ -1,5 +1,7 @@
 package com.littleetx.database_project_1.file_database;
 
+import com.littleetx.database_project_1.file_database.jsonTypes.ColumnInfo;
+import com.littleetx.database_project_1.file_database.jsonTypes.TableInfo;
 import com.littleetx.database_project_1.file_database.types.DatabaseType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -10,16 +12,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Table {
-    private final String tableName;
     private final FileOperator fileOperator;
-    private String[] columnNames;
-    private String[] columnTypes;
+    private final TableInfo tableInfo;
 
     public Table(String name, String[] columnNames, String[] columnTypes) {
-        tableName = name;
-        this.columnNames = columnNames;
-        this.columnTypes = columnTypes;
-        fileOperator = new FileOperator_CSV(tableName + ".csv");
+        List<ColumnInfo> columns = new ArrayList<>();
+        for (int i = 0; i < columnNames.length; i++) {
+            columns.add(new ColumnInfo(columnNames[i], columnTypes[i]));
+        }
+        tableInfo = new TableInfo(columns, name);
+        fileOperator = new FileOperator_CSV(Database.DatabasePath + name + ".csv");
+        //TODO : add a check to make sure the columnTypes are valid
+    }
+
+    public Table(TableInfo tableInfo) {
+        this.tableInfo = tableInfo;
+        fileOperator = new FileOperator_CSV(Database.DatabasePath + tableInfo.name() + ".csv");
+        //TODO : add a check to make sure the columnTypes are valid
+    }
+
+    public TableInfo getTableInfo() {
+        return tableInfo;
     }
 
     /**
@@ -39,7 +52,7 @@ public class Table {
     public void insert(@NotNull List<@Nullable Object @NotNull []> rows) {
         List<String[]> stringRows = new ArrayList<>();
         for (Object[] row : rows) {
-            if (row.length != columnNames.length) {
+            if (row.length != tableInfo.columns().size()) {
                 throw new IllegalArgumentException(
                         "The number of values does not match the number of columns");
             }
@@ -98,29 +111,33 @@ public class Table {
         return result;
     }
 
-    public void update(@NotNull String column, @Nullable Object oldValue, @Nullable Object newValue) {
-        update(new String[]{column}, new Object[]{oldValue}, new Object[]{newValue});
+    public void update(@NotNull String findColumns, @Nullable Object oldValue,
+                       @NotNull String modifyColumns, @Nullable Object newValue) {
+        update(new String[]{findColumns}, new Object[]{oldValue},
+                new String[]{modifyColumns}, new Object[]{newValue});
     }
 
     /**
      * update rows in the table
-     * @param columns columns to be updated
-     * @param oldValues old values of the columns
-     * @param newValues new values of the columns
+     * @param findColumns findColumns to be updated
+     * @param oldValues old values of the findColumns
+     * @param newValues new values of the findColumns
      */
 
-    public void update(@NotNull String @NotNull [] columns,
-                       @Nullable Object @NotNull [] oldValues, @Nullable Object @NotNull [] newValues) {
-        if (columns.length != oldValues.length || columns.length != newValues.length) {
+    public void update(@NotNull String @NotNull [] findColumns, @Nullable Object @NotNull [] oldValues,
+                       @NotNull String @NotNull [] modifyColumns, @Nullable Object @NotNull [] newValues) {
+        if (findColumns.length != oldValues.length || modifyColumns.length != newValues.length) {
             throw new IllegalArgumentException(
-                    "The number of columns does not match the number of values");
+                    "The number of findColumns does not match the number of values");
         }
 
-        int[] columnIndices = getColumnIndices(columns);
-        String[] stringOldValues = objToStr(columnIndices, oldValues);
-        String[] stringNewValues = objToStr(columnIndices, newValues);
+        int[] findColumnIndices = getColumnIndices(findColumns);
+        String[] stringOldValues = objToStr(findColumnIndices, oldValues);
+        int[] modifyColumnIndices = getColumnIndices(modifyColumns);
+        String[] stringNewValues = objToStr(modifyColumnIndices, newValues);
 
-        fileOperator.modifyRowsTo(columnIndices, stringOldValues, stringNewValues);
+        fileOperator.modifyRowsTo(findColumnIndices, stringOldValues,
+                modifyColumnIndices, stringNewValues);
     }
 
     public void delete(@NotNull String column, @Nullable Object value) {
@@ -145,8 +162,8 @@ public class Table {
     }
 
     private int findColumnIndex(String column) {
-        for (int i = 0; i < columnNames.length; i++) {
-            if (columnNames[i].equals(column)) {
+        for (int i = 0; i < tableInfo.columns().size(); i++) {
+            if (tableInfo.columns().get(i).name().equals(column)) {
                 return i;
             }
         }
@@ -181,12 +198,14 @@ public class Table {
                     stringValues[i] = null;
                 else
                     stringValues[i] = DatabaseType.
-                            getInstance(columnTypes[columnIndices[i]], row[i]).toString();
+                            getInstance(tableInfo.columns()
+                                    .get(columnIndices[i]).type(), row[i]).toString();
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException(e);
             } catch (InvocationTargetException e) {
                 throw new IllegalArgumentException(
-                        "value " + row[i] + " is not of type " + columnTypes[columnIndices[i]]);
+                        "value " + row[i] + " is not of type " + tableInfo.columns()
+                                .get(columnIndices[i]).type());
             }
         }
         return stringValues;
@@ -208,12 +227,13 @@ public class Table {
                 if (strings[i] == null)
                     objs[i] = null;
                 else
-                    objs[i] = DatabaseType.getInstance(columnTypes[columnIndices[i]], strings[i]).getValue();
+                    objs[i] = DatabaseType.getInstance(tableInfo.columns()
+                            .get(columnIndices[i]).type(), strings[i]).getValue();
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException(e);
             } catch (InvocationTargetException e) {
                 throw new RuntimeException("Data " + strings[i] + " cannot meet Type "
-                        + columnTypes[columnIndices[i]], e);
+                        + tableInfo.columns().get(columnIndices[i]).type(), e);
             }
         }
         return objs;
@@ -232,8 +252,9 @@ public class Table {
         printTable(t.select(new String[]{"str", "int"}, new Object[]{"abc", 30}));
 
         System.out.println("Update check");
-        t.update("number", null, "40.7");
-        t.update("int", 40, null);
+        t.update("number", null, "number", "40.7");
+        t.update("int", 40, "str", "is forty!");
+        t.update("str", "is forty!", "int", null);
         printTable(t.select());
 
         System.out.println("Delete check");
