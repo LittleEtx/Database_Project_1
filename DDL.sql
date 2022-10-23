@@ -42,7 +42,7 @@ create table item(
 
 create table route(
     id int primary key ,
-    retrieval_city int references city(id),
+    retrieval_city_id int references city(id),
     export_city_id int references city(id),
     import_city_id int references city(id),
      delivery_city_id int references city(id)
