@@ -4,7 +4,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDate;
 
-public record Log_Delivery(
+//relationship
+public record Delivery(
+        @NotNull Item item,
         @NotNull LocalDate deliveryDate,
         @NotNull Courier courier
 ) {

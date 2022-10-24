@@ -41,7 +41,7 @@ create table item(
     type varchar
 );
 
-create table route(
+create table itemViaCity(
     id int primary key ,
     retrieval_city_id int references city(id),
     export_city_id int references city(id),
@@ -54,7 +54,7 @@ create table logs(
     log_time date,
     item_id int references item(id),
     tax_info_id int references tax_info(id),
-    route_id int references route(id)
+    route_id int references itemViaCity(id)
 );
 
 create table retrieve(

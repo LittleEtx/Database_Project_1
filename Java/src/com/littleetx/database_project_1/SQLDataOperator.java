@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.littleetx.database_project_1.file_database.jsonTypes.DatabaseInfo;
 import com.littleetx.database_project_1.records.City;
+import com.littleetx.database_project_1.records.Information;
 import com.littleetx.database_project_1.records.Item;
 import com.littleetx.database_project_1.records.Log;
 
@@ -54,50 +55,9 @@ public class SQLDataOperator implements IDataOperator {
 
 
     @Override
-    public void insert(Log log) {
+    public void insert(Information info) {
         //insert into cities
-        int retrievalCityId = insertCity(log.route().retrievalCity());
-        int importCityId = insertCity(log.route().importCity());
-        int exportCityId = insertCity(log.route().exportCity());
-        int deliveryCityId = insertCity(log.route().deliveryCity());
 
-        //insert into routes
-        String insertRoute = "insert into route " +
-                "(id, retrieval_city_id, export_city_id, import_city_id, delivery_city_id) " +
-                "values (?, ?, ?, ?, ?)";
-        try {
-            PreparedStatement routeStatement = con.prepareStatement(insertRoute);
-            int routeId = getIdFrom("route");
-            routeStatement.setInt(1, routeId);
-            routeStatement.setInt(2, retrievalCityId);
-            routeStatement.setInt(3, exportCityId);
-            routeStatement.setInt(4, importCityId);
-            routeStatement.setInt(5, deliveryCityId);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
-        //insert into items
-        String insertItem = "insert into item (id, name, price) values (?, ?, ?)";
-        try {
-            PreparedStatement itemStatement = con.prepareStatement(insertItem);
-//            itemStatement.setInt(1, log.item().name());
-            itemStatement.setString(2, log.item().name());
-            itemStatement.setDouble(3, log.item().price());
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
-
-        //insert into container
-        String insertContainer = "insert into container (code, type) values (?, ?)";
-        try (PreparedStatement ps = con.prepareStatement(insertContainer)) {
-//            ps.setString(1, log.container().code());
-//            ps.setString(2, log.container().type());
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw  new RuntimeException(e);
-        }
     }
 
     private int insertCity(City city) {

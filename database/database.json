@@ -1,19 +1,63 @@
-{"tables":
-[
-  {"columns": [
-    {"name":"name",
-      "type":"Varchar"},
-    {"name":"price",
-      "type":"Integer"},
-    {"name":"type",
-      "type":"Varchar"}
-  ],"name":"item"
-  },
-  {"columns": [
-    {"name":"column1",
-      "type":"Varchar"},
-    {"name":"column2",
-      "type":"Integer"}
-  ],"name":"table2"}
-]
+{
+  "tables": [
+    {
+      "columns": [
+        {
+          "name":"name",
+          "type":"Varchar"
+        },
+        {
+          "name":"price",
+          "type":"Integer"
+        },
+        {
+          "name":"type",
+          "type":"Varchar"
+        }
+      ],
+      "name":"item"
+    },
+    {
+      "columns": [
+        {
+          "name":"id",
+          "type":"Integer"
+        },
+        {
+          "name":"name",
+          "type":"Varchar"
+        },
+        {
+          "name":"gender",
+          "type":"Varchar"
+        },
+        {
+          "name": "phone_number",
+          "type": "Varchar"
+        },
+        {
+          "name": "age",
+          "type": "Integer"
+        },
+        {
+          "name": "company_id",
+          "type": "Integer"
+        }
+      ],
+      "name":"courier"
+    },
+    {
+      "columns": [
+        {
+          "name": "id",
+          "type": "Integer"
+        },
+        {
+          "name": "name",
+          "type": "Varchar"
+        }
+      ],
+      "name": "company"
+    }
+  ]
 }

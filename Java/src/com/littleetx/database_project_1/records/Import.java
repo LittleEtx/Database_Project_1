@@ -4,9 +4,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDate;
 
-public record Log_Export(
-        @NotNull LocalDate date,
-        @NotNull Container container,
-        @NotNull Ship Ship
+public record Import(
+        @NotNull Item item,
+        @NotNull LocalDate date
 ) {
 }
