@@ -9,6 +9,16 @@ public class FileDataOperator implements IDataOperator {
 
     @Override
     public void insert(Log log) {
+        
+
+
+
+
+
+
+
+
+
 
     }
 

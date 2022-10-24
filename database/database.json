@@ -1,1 +1,19 @@
-{"tables":[{"columns":[{"name":"column1","type":"Varchar"},{"name":"column2","type":"Integer"}],"name":"table1"},{"columns":[{"name":"column1","type":"Varchar"},{"name":"column2","type":"Integer"}],"name":"table2"}]}
+{"tables":
+[
+  {"columns": [
+    {"name":"name",
+      "type":"Varchar"},
+    {"name":"price",
+      "type":"Integer"},
+    {"name":"type",
+      "type":"Varchar"}
+  ],"name":"item"
+  },
+  {"columns": [
+    {"name":"column1",
+      "type":"Varchar"},
+    {"name":"column2",
+      "type":"Integer"}
+  ],"name":"table2"}
+]
+}

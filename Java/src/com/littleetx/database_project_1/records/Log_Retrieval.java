@@ -6,8 +6,7 @@ import java.time.LocalDate;
 
 public record Log_Retrieval (
         @NotNull LocalDate date,
-        @NotNull Courier courier,
-        @NotNull String retrievalCity
+        @NotNull Courier courier
 ) {
 
 }

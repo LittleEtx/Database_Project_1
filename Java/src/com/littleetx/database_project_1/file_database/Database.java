@@ -20,8 +20,6 @@ public class Database implements Iterable<Table> {
     private static final String DDLPath = DatabasePath + "database.json";
     private List<Table> tables;
 
-    private final DatabaseMsg msg = new DatabaseMsg(System.out);
-
     public void initialize() {
         File file = new File(DDLPath);
         DatabaseInfo info;
@@ -55,7 +53,7 @@ public class Database implements Iterable<Table> {
             tables.add(table);
         }
 
-        msg.print("Database initialized");
+        DatabaseMsg.print("Database initialized");
     }
 
     public void createTable(TableInfo tableInfo) {
@@ -79,7 +77,7 @@ public class Database implements Iterable<Table> {
             throw new RuntimeException(e);
         }
         write();
-        msg.print("Table " + table.getTableInfo().name() + " created");
+        DatabaseMsg.print("Table " + table.getTableInfo().name() + " created");
     }
 
     public void dropTable(String tableName) {
@@ -100,7 +98,7 @@ public class Database implements Iterable<Table> {
             throw new RuntimeException("Cannot delete table file " + tableName + ".csv");
         }
 
-        msg.print("Table " + tableName + " dropped");
+        DatabaseMsg.print("Table " + tableName + " dropped");
     }
 
     //TODO : link Table to Database
