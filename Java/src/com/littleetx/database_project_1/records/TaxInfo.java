@@ -5,6 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import java.math.BigDecimal;
 
 public record TaxInfo(
-        @NotNull BigDecimal exportRate, @NotNull BigDecimal importRate
+        @NotNull Item item,
+        @NotNull BigDecimal exportRate,
+        @NotNull BigDecimal importRate
 ) {
 }

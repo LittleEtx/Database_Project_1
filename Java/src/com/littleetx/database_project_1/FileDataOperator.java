@@ -1,14 +1,11 @@
 package com.littleetx.database_project_1;
 
-import com.littleetx.database_project_1.records.Company;
-import com.littleetx.database_project_1.records.Item;
-import com.littleetx.database_project_1.records.Log;
-import com.littleetx.database_project_1.records.Ship;
+import com.littleetx.database_project_1.records.*;
 
 public class FileDataOperator implements IDataOperator {
 
     @Override
-    public void insert(Log log) {
+    public void insert(Information info) {
         
 
 
@@ -38,11 +35,7 @@ public class FileDataOperator implements IDataOperator {
     }
 
     public static void main(String[] args) {
-        Item item = new Item("apple_11", "apple", 30);
-        System.out.println(item);
-        Company company = new Company("SUSTC");
-        Ship ship = new Ship("deep blue", company);
-        System.out.println(ship);
+
     }
 
 }

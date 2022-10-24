@@ -4,7 +4,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDate;
 
-public record Log_Import(
-        @NotNull LocalDate date
+public record Retrieval(
+        @NotNull Item item,
+        @NotNull LocalDate date,
+        @NotNull Courier courier
 ) {
+
 }
