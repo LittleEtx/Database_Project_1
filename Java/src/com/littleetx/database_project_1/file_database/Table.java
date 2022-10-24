@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class Table {
@@ -49,7 +50,7 @@ public class Table {
      * add multiple rows to the table
      * @param rows rows to be added
      */
-    public void insert(@NotNull List<@Nullable Object @NotNull []> rows) {
+    public void insert(@NotNull Collection<@Nullable Object @NotNull []> rows) {
         List<String[]> stringRows = new ArrayList<>();
         for (Object[] row : rows) {
             if (row.length != tableInfo.columns().size()) {

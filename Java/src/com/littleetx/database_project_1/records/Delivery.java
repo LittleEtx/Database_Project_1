@@ -7,7 +7,7 @@ import java.time.LocalDate;
 //relationship
 public record Delivery(
         @NotNull Item item,
-        @NotNull LocalDate deliveryDate,
+        @NotNull LocalDate date,
         @NotNull Courier courier
 ) {
 }

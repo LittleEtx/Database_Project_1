@@ -10,7 +10,7 @@ public record Courier(
         @NotNull String name,
         @NotNull String gender,
         @NotNull String phoneNumber,
-        @NotNull LocalDate birthDay,
+        @NotNull LocalDate birthday,
         @NotNull Company company
 ) {
 }

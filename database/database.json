@@ -3,19 +3,45 @@
     {
       "columns": [
         {
-          "name":"name",
-          "type":"Varchar"
+          "name": "id",
+          "type": "Integer"
         },
         {
-          "name":"price",
-          "type":"Integer"
+          "name": "name",
+          "type": "Varchar"
         },
         {
-          "name":"type",
-          "type":"Varchar"
+          "name": "area_code",
+          "type": "Varchar"
         }
       ],
-      "name":"item"
+      "name": "city"
+    },
+    {
+      "columns": [
+        {
+          "name": "id",
+          "type": "Integer"
+        },
+        {
+          "name": "name",
+          "type": "Varchar"
+        }
+      ],
+      "name": "company"
+    },
+    {
+      "columns": [
+        {
+          "name": "code",
+          "type": "Varchar"
+        },
+        {
+          "name": "type",
+          "type": "Varchar"
+        }
+      ],
+      "name": "container"
     },
     {
       "columns": [
@@ -36,8 +62,8 @@
           "type": "Varchar"
         },
         {
-          "name": "age",
-          "type": "Integer"
+          "name": "birthday",
+          "type": "Date"
         },
         {
           "name": "company_id",
@@ -49,15 +75,159 @@
     {
       "columns": [
         {
+          "name": "item_id",
+          "type": "Integer"
+        },
+        {
+          "name": "date",
+          "type": "Date"
+        },
+        {
+          "name": "courier_id",
+          "type": "Integer"
+        }
+      ],
+      "name": "delivery"
+    },
+    {
+      "columns": [
+        {
+          "name": "item_id",
+          "type": "Integer"
+        },
+        {
+          "name": "date",
+          "type": "Date"
+        },
+        {
+          "name": "container_code",
+          "type": "Varchar"
+        },
+        {
+          "name": "ship_id",
+          "type": "Integer"
+        }
+      ],
+      "name": "export"
+    },
+    {
+      "columns": [
+        {
+          "name": "item_id",
+          "type": "Integer"
+        },
+        {
+          "name": "date",
+          "type": "Date"
+        }
+      ],
+      "name": "import"
+    },
+    {
+      "columns": [
+        {
+          "name":"id",
+          "type":"Integer"
+        },
+        {
+          "name":"type",
+          "type":"Varchar"
+        },
+        {
+          "name":"price",
+          "type":"Integer"
+        }
+      ],
+      "name":"item"
+    },
+    {
+      "columns": [
+        {
+          "name": "item_id",
+          "type": "Integer"
+        },
+        {
+          "name": "retrieval_city_id",
+          "type": "Integer"
+        },
+        {
+          "name": "export_city_id",
+          "type": "Integer"
+        },
+        {
+          "name": "import_city_id",
+          "type": "Integer"
+          },
+          {
+          "name": "delivery_city_id",
+          "type": "Integer"
+        }
+      ],
+      "name": "item_via_city"
+    },
+    {
+      "columns": [
+        {
+          "name": "item_id",
+          "type": "Integer"
+        },
+        {
+          "name": "log_time",
+          "type": "DateTime"
+        }
+      ],
+      "name": "log"
+    },
+    {
+      "columns": [
+        {
+          "name": "item_id",
+          "type": "Integer"
+        },
+        {
+          "name": "date",
+          "type": "Date"
+        },
+        {
+          "name": "courier_id",
+          "type": "Integer"
+        }
+      ],
+      "name": "retrieval"
+    },
+    {
+      "columns": [
+        {
           "name": "id",
           "type": "Integer"
         },
         {
           "name": "name",
           "type": "Varchar"
+        },
+        {
+          "name": "company_id",
+          "type": "Integer"
         }
       ],
-      "name": "company"
+      "name": "ship"
+    },
+    {
+      "columns": [
+        {
+          "name": "item_id",
+          "type": "Integer"
+        },
+        {
+          "name": "export_rate",
+          "type": "Numeric"
+        },
+        {
+          "name": "import_rate",
+          "type": "Numeric"
+        }
+      ],
+      "name": "tax_info"
     }
   ]
 }
