@@ -67,7 +67,7 @@ public class SQLDataOperator implements IDataOperator {
                 "values (?, ?, ?, ?, ?)";
         try {
             PreparedStatement routeStatement = con.prepareStatement(insertRoute);
-            int routeId = getIdFrom("route");
+            int routeId = getIdFrom("route");//???
             routeStatement.setInt(1, routeId);
             routeStatement.setInt(2, retrievalCityId);
             routeStatement.setInt(3, exportCityId);
@@ -127,14 +127,14 @@ public class SQLDataOperator implements IDataOperator {
 
     private int getIdFrom(String table) throws SQLException {
         String maxId = "select max(id) from " + table;
-        PreparedStatement maxCityIdStatement = con.prepareStatement(maxId);
-        ResultSet maxIdResult = maxCityIdStatement.executeQuery();
+        PreparedStatement maxIdStatement = con.prepareStatement(maxId);
+        ResultSet maxIdResult = maxIdStatement.executeQuery();
         int id;
         if (!maxIdResult.next()) {
             id = 0;
         } else {
             id = maxIdResult.getInt(1) + 1;
-        }
+    }
         return id;
     }
 
