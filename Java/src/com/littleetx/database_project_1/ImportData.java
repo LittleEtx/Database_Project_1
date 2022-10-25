@@ -1,6 +1,5 @@
 package com.littleetx.database_project_1;
 
-import com.littleetx.database_project_1.file_database.DatabaseMsg;
 import com.littleetx.database_project_1.file_database.FileOperator;
 import com.littleetx.database_project_1.file_database.FileOperator_CSV;
 import com.littleetx.database_project_1.records.*;
@@ -9,116 +8,164 @@ import java.io.FileNotFoundException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.SignStyle;
-import java.time.temporal.ChronoField;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+
+import static com.littleetx.database_project_1.DataIndexMapping.*;
 
 public class ImportData {
 
     private static final String DataFile = "data.csv";
 
     public static Information importData() {
-//        FileOperator fileOperator = new FileOperator_CSV(DataFile);
-//        try {
-//            Iterator<String[]> reader = fileOperator.getReader().iterator();
-//            reader.next();
-//            while (reader.hasNext()) {
-//                String[] info = reader.next();
-//                Item item = new Item(info[0], info[1], Integer.parseInt(info[2]));
-//                City retrievalCity = new City(info[3]);
-//                City deliveryCity = new City(info[10]);
-//                City exportCity = new City(info[15]);
-//                City importCity = new City(info[18]);
-//                ItemViaCity itemViaCity = new ItemViaCity(retrievalCity, exportCity, importCity, deliveryCity);
-//                TaxInfo taxInfo = new TaxInfo(new BigDecimal(info[16]), new BigDecimal(info[19]));
-//
-//                Company company = new Company(info[24]);
-//
-//                //retrieval
-//                Courier courier = new Courier(info[11], info[12], info[13], Integer.parseInt(info[14]), company);
-//                DateTimeFormatter dateFormatter = (new DateTimeFormatterBuilder())
-//                        .appendValue(ChronoField.YEAR, 4)
-//                        .appendLiteral('/')
-//                        .appendValue(ChronoField.MONTH_OF_YEAR, 1, 2, SignStyle.NOT_NEGATIVE)
-//                        .appendLiteral('/')
-//                        .appendValue(ChronoField.DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE)
-//                        .toFormatter();
-//                Retrieval retrieval = new Retrieval(LocalDate.parse(info[4], dateFormatter), courier);
-//
-//                //export
-//                Export export = null;
-//                if (info[17] != null) {
-//                    Container container = new Container(info[21], info[22]);
-//                    Ship ship = new Ship(info[23], company);
-//                    export = new Export(LocalDate.parse(info[17], dateFormatter), container, ship);
-//                }
-//
-//                //import
-//                Import imports = null;
-//                if (info[20] != null) {
-//                    imports = new Import(LocalDate.parse(info[20], dateFormatter));
-//                }
-//
-//                //delivery
-//                Delivery delivery = null;
-//                if (info[9] != null) {
-//                    Courier deliveryCourier = new Courier(info[11], info[12], info[13],
-//                            Integer.parseInt(info[14]), company);
-//                    delivery = new Delivery(LocalDate.parse(info[9], dateFormatter), deliveryCourier);
-//                }
-//
-//                DateTimeFormatter timeFormatter = (new DateTimeFormatterBuilder())
-//                        .appendValue(ChronoField.YEAR, 4)
-//                        .appendLiteral('/')
-//                        .appendValue(ChronoField.MONTH_OF_YEAR, 1, 2, SignStyle.NOT_NEGATIVE)
-//                        .appendLiteral('/')
-//                        .appendValue(ChronoField.DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE)
-//                        .appendLiteral(' ')
-//                        .appendValue(ChronoField.HOUR_OF_DAY, 1, 2, SignStyle.NOT_NEGATIVE)
-//                        .appendLiteral(':')
-//                        .appendValue(ChronoField.MINUTE_OF_HOUR, 1, 2, SignStyle.NOT_NEGATIVE)
-//                        .toFormatter();
-//
-//                Log log = new Log(item, itemViaCity, taxInfo, retrieval, export, imports, delivery,
-//                        LocalDateTime.parse(info[25], timeFormatter));
-//                list.add(log);
-//            }
-//        } catch (FileNotFoundException e) {
-//            throw new RuntimeException("Cannot find file " + DataFile, e);
-//        }
-//
-        return null;
+        Map<String, City> cities = new HashMap<>();
+        int cityId = 1;
+        Map<String, Company> companies = new HashMap<>();
+        int companyId = 1;
+        Map<String, Container> containers = new HashMap<>();
+        Map<String, Courier> couriers = new HashMap<>();
+        int courierId = 1;
+        List<Delivery> deliveries = new ArrayList<>();
+        List<Export> exports = new ArrayList<>();
+        List<Import> imports = new ArrayList<>();
+        List<Item> items = new ArrayList<>();
+        List<ItemViaCity> itemsViaCities = new ArrayList<>();
+        List<Log> logs = new ArrayList<>();
+        List<Retrieval> retrievals = new ArrayList<>();
+        Map<String, Ship> ships = new HashMap<>();
+        int shipId = 1;
+        List<TaxInfo> taxInfos = new ArrayList<>();
+
+        FileOperator fileOperator = new FileOperator_CSV(DataFile);
+        try {
+            Iterator<String[]> reader = fileOperator.getReader().iterator();
+            reader.next();
+            while (reader.hasNext()) {
+                String[] info = reader.next();
+                Item item = new Item(Integer.parseInt(info[ItemName]
+                        .substring(info[ItemType].length() + 1), 16),
+                        info[ItemType], Integer.parseInt(info[ItemPrice]));
+                items.add(item);
+
+                City retrievalCity = cities.get(info[RetrievalCity]);
+                if (retrievalCity == null) {
+                    retrievalCity = new City(cityId++, info[RetrievalCity],
+                            info[RetrievalCourierPhoneNumber].substring(0,4));
+                    cities.put(info[RetrievalCity], retrievalCity);
+                }
+
+                City deliveryCity = cities.get(info[DeliveryCity]);
+                if (deliveryCity == null) {
+                    deliveryCity = new City(cityId++, info[DeliveryCity],
+                            info[DeliveryCourierPhoneNumber] != null ?
+                                    info[DeliveryCourierPhoneNumber].substring(0,4) : null);
+                    cities.put(info[DeliveryCity], deliveryCity);
+                }
+
+                City exportCity = cities.get(info[ItemExportCity]);
+                if (exportCity == null) {
+                    exportCity = new City(cityId++, info[ItemExportCity], null);
+                    cities.put(info[ItemExportCity], exportCity);
+                }
+                City importCity = cities.get(info[ItemExportCity]);
+                if (importCity == null) {
+                    importCity = new City(cityId++, info[ItemImportCity], null);
+                    cities.put(info[ItemImportCity], importCity);
+                }
+
+                ItemViaCity itemViaCity = new ItemViaCity(item,
+                        retrievalCity, exportCity, importCity, deliveryCity);
+                itemsViaCities.add(itemViaCity);
+                TaxInfo taxInfo = new TaxInfo(item, new BigDecimal(info[ItemExportTax]),
+                        new BigDecimal(info[ItemImportTax]));
+                taxInfos.add(taxInfo);
+
+                Company company = companies.get(info[CompanyName]);
+                if (company == null) {
+                    company = new Company(companyId++, info[CompanyName]);
+                    companies.put(info[CompanyName], company);
+                }
+
+                //retrieval
+                String retrievalPhone = info[RetrievalCourierPhoneNumber].substring(5);
+                Courier courier = couriers.get(retrievalPhone);
+                if (courier == null) {
+                    courier= new Courier(courierId++, info[RetrievalCourier],
+                            info[RetrievalCourierGender], retrievalPhone,
+                            LocalDate.ofYearDay(Integer.parseInt(info[RetrievalStartTime].substring(0,4)) -
+                                    Integer.parseInt(info[RetrievalCourierAge]), 1), company);
+                    couriers.put(retrievalPhone, courier);
+                }
+
+                retrievals.add(new Retrieval(item,
+                        LocalDate.parse(info[RetrievalStartTime]), courier));
+
+                //export
+                if (info[ItemExportTime] != null) {
+                    Container container = containers.get(info[ContainerCode]);
+                    if (container == null) {
+                        container = new Container(info[ContainerCode], info[ContainerType]);
+                        containers.put(info[ContainerCode], container);
+                    }
+                    Ship ship = ships.get(info[ShipName]);
+                    if (ship == null) {
+                        ship = new Ship(shipId++, info[ShipName], company);
+                        ships.put(info[ShipName], ship);
+                    }
+                    exports.add(new Export(item, LocalDate.parse(info[ItemExportTime]), container, ship));
+                }
+
+                //import
+                if (info[ItemImportTime] != null) {
+                    imports.add(new Import(item, LocalDate.parse(info[ItemImportTime])));
+                }
+
+                //delivery
+                if (info[DeliveryFinishedTime] != null) {
+                    String deliveryPhone = info[DeliveryCourierPhoneNumber].substring(5);
+                    Courier deliveryCourier = couriers.get(deliveryPhone);
+                    if (deliveryCourier == null) {
+                        deliveryCourier = new Courier(courierId++, info[DeliveryCourier],
+                                info[DeliveryCourierGender], deliveryPhone,
+                                LocalDate.ofYearDay(Integer.parseInt(info[DeliveryFinishedTime].substring(0,4)) -
+                                        (int)Double.parseDouble(info[DeliveryCourierAge]), 1), company);
+                        couriers.put(deliveryPhone, deliveryCourier);
+                    }
+                    deliveries.add(new Delivery(item, LocalDate.parse(info[DeliveryFinishedTime]),
+                            deliveryCourier));
+                }
+
+                Log log = new Log(item, LocalDateTime.parse(info[LogTime]
+                        .replace(" ", "T")));
+                logs.add(log);
+            }
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException("Cannot find file " + DataFile, e);
+        }
+        return new Information(cities.values(), companies.values(), containers.values(),
+                couriers.values(), deliveries, exports, imports,
+                items, itemsViaCities, logs, retrievals, ships.values(), taxInfos);
     }
 
-
     public static void main(String[] args) {
-//        DatabaseMsg.setStream(null);
-//
-//        List<Log> list = importData();
-//        System.out.println("Successfully import data into memory");
-//        System.out.println("Start to insert data into database via sql");
-//        long sqlStart = System.currentTimeMillis();
-//        IDataOperator sqlOperator = new SQLDataOperator();
-//        for (Log log : list) {
-//            sqlOperator.insert(log);
-//            sqlOperator.insert(log);
-//        }
-//        System.out.println("Insert data into database via sql finished，time cost: "
-//                + (System.currentTimeMillis() - sqlStart) + "ms");
-//
-//        System.out.println("Start to insert data into database via file");
-//        long fileStart = System.currentTimeMillis();
-//        IDataOperator fileOperator = new FileDataOperator();
-//        for (Log log : list) {
-//            sqlOperator.insert(log);
-//            fileOperator.insert(log);
-//        }
-//        System.out.println("Insert data into database via file finished，time cost: "
-//                + (System.currentTimeMillis() - fileStart) + "ms");
+        //DatabaseMsg.setStream(null);
+        Logger.setStream(System.out);
+
+        System.out.println("Loading data...");
+        Information info = importData();
+        System.out.println("Successfully import data into memory");
+        System.out.println("Start to insert data into database via sql");
+        long sqlStart = System.currentTimeMillis();
+        IDataOperator sqlOperator = new SQLDataOperator();
+        sqlOperator.insert(info);
+        System.out.println("Insert data into database via sql finished，time cost: "
+                + (System.currentTimeMillis() - sqlStart) + "ms");
+
+        System.out.println("Start to insert data into database via file");
+        long fileStart = System.currentTimeMillis();
+        IDataOperator fileOperator = new FileDataOperator();
+        fileOperator.insert(info);
+        System.out.println("Insert data into database via file finished，time cost: "
+                + (System.currentTimeMillis() - fileStart) + "ms");
     }
 
 }

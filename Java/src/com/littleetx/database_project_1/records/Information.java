@@ -1,20 +1,20 @@
 package com.littleetx.database_project_1.records;
 
-import java.util.List;
+import java.util.Collection;
 
 public record Information(
-        List<City> cities,
-        List<Company> companies,
-        List<Container> containers,
-        List<Courier> couriers,
-        List<Delivery> deliveries,
-        List<Export> exports,
-        List<Import> imports,
-        List<Item> items,
-        List<ItemViaCity> itemsViaCities,
-        List<Log> logs,
-        List<Retrieval> retrievals,
-        List<Ship> ships,
-        List<TaxInfo> taxInfos
+        Collection<City> cities,
+        Collection<Company> companies,
+        Collection<Container> containers,
+        Collection<Courier> couriers,
+        Collection<Delivery> deliveries,
+        Collection<Export> exports,
+        Collection<Import> imports,
+        Collection<Item> items,
+        Collection<ItemViaCity> itemsViaCities,
+        Collection<Log> logs,
+        Collection<Retrieval> retrievals,
+        Collection<Ship> ships,
+        Collection<TaxInfo> taxInfos
 ) {
 }

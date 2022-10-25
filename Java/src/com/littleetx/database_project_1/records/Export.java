@@ -6,9 +6,9 @@ import java.time.LocalDate;
 
 //relationship
 public record Export(
-        int export_id,
+        @NotNull Item item,
         @NotNull LocalDate date,
         @NotNull Container container,
-        @NotNull Ship Ship
+        @NotNull Ship ship
 ) {
 }

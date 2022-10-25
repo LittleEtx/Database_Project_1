@@ -7,18 +7,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.littleetx.database_project_1.file_database.jsonTypes.ColumnInfo;
 import com.littleetx.database_project_1.file_database.jsonTypes.DatabaseInfo;
 import com.littleetx.database_project_1.file_database.jsonTypes.TableInfo;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
-public class Database implements Iterable<Table> {
+public class Database {
     public static final String DatabasePath = "database/";
     private static final String DDLPath = DatabasePath + "database.json";
-    private List<Table> tables;
+    private Map<String, Table> tables;
 
     public void initialize() {
         File file = new File(DDLPath);
@@ -47,10 +45,10 @@ public class Database implements Iterable<Table> {
             }
         }
 
-        tables = new ArrayList<>();
+        tables = new HashMap<>();
         for (TableInfo tableInfo : info.tables()) {
             Table table = new Table(tableInfo);
-            tables.add(table);
+            tables.putIfAbsent(table.getTableInfo().name(), table);
         }
 
         DatabaseMsg.print("Database initialized");
@@ -61,13 +59,11 @@ public class Database implements Iterable<Table> {
     }
 
     public void createTable(Table table) {
-        for (Table t : tables) {
-            if (t.getTableInfo().name().equals(table.getTableInfo().name())) {
-                throw new IllegalArgumentException("Table "  + table.getTableInfo().name() + " already exists");
-            }
+        if (tables.get(table.getTableInfo().name()) != null) {
+            throw new IllegalArgumentException("Table "  + table.getTableInfo().name() + " already exists");
         }
 
-        tables.add(table);
+        tables.put(table.getTableInfo().name(), table);
         File file = new File(DatabasePath + table.getTableInfo().name() + ".csv");
         try {
             if (!file.createNewFile()) {
@@ -81,15 +77,10 @@ public class Database implements Iterable<Table> {
     }
 
     public void dropTable(String tableName) {
-        boolean hasTable = false;
-        for (Table table : tables) {
-            if (table.getTableInfo().name().equals(tableName)) {
-                tables.remove(table);
-                hasTable = true;
-                break;
-            }
-        }
-        if (!hasTable) {
+        Table table = tables.get(tableName);
+        if (table != null) {
+            tables.remove(table.getTableInfo().name());
+        } else {
             throw new IllegalArgumentException("Table " + tableName + " does not exist");
         }
         write();
@@ -102,27 +93,17 @@ public class Database implements Iterable<Table> {
     }
 
     //TODO : link Table to Database
-    @NotNull
-    @Override
-    public Iterator<Table> iterator() {
-        return new Iterator<>() {
-            private int index = 0;
+    public Collection<Table> getTables() {
+        return tables.values();
+    }
 
-            @Override
-            public boolean hasNext() {
-                return index < tables.size();
-            }
-
-            @Override
-            public Table next() {
-                return tables.get(index++);
-            }
-        };
+    public @Nullable Table getTable(String tableName) {
+        return tables.get(tableName);
     }
 
     private void write() {
         List<TableInfo> tableInfos = new ArrayList<>();
-        for (Table table : tables) {
+        for (Table table : tables.values()) {
             tableInfos.add(table.getTableInfo());
         }
         DatabaseInfo info = new DatabaseInfo(tableInfos);
