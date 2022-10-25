@@ -1,5 +1,5 @@
 create table item(
-    code int primary key ,
+    id int primary key ,
     type varchar,
     price int
 );
@@ -41,14 +41,12 @@ create table tax_info(
 );
 
 
-
 create table route(
     item_id int primary key references item(id),
     retrieval_city int references city(id),
     export_city_id int references city(id),
     import_city_id int references city(id),
-     delivery_city_id int references city(id),
-     unique(retrieval_city,export_city_id,import_city_id,delivery_city_id)
+     delivery_city_id int references city(id)
 );
 
 create table logs(
