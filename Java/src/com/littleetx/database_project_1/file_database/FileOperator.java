@@ -52,12 +52,12 @@ public abstract class FileOperator {
     }
 
 
-    public void modifyRowsTo(int findColumnIndex, String values,
+    public int modifyRowsTo(int findColumnIndex, String values,
                              int modifyColumnIndex, String newValues) {
-        modifyRowsTo(new int[]{findColumnIndex}, new String[]{values},
+        return modifyRowsTo(new int[]{findColumnIndex}, new String[]{values},
                 new int[]{modifyColumnIndex}, new String[]{newValues});
     }
-    public void modifyRowsTo(int @NotNull [] findColumnIndices, String @NotNull [] values,
+    public int modifyRowsTo(int @NotNull [] findColumnIndices, String @NotNull [] values,
                              int @NotNull [] modifyColumnIndices, String @NotNull [] newValues) {
         if (findColumnIndices.length == 0 || findColumnIndices.length != values.length ||
                 modifyColumnIndices.length == 0 || modifyColumnIndices.length != newValues.length) {
@@ -66,6 +66,7 @@ public abstract class FileOperator {
         }
 
         int maxIndex = getMaxIndex(findColumnIndices);
+        int count = 0;
 
         try (FileWriter writer = new FileWriter(filePath + ".tmp")) {
             try(FileOperatorReader reader = getReader()) {
@@ -82,6 +83,7 @@ public abstract class FileOperator {
                         for (int i = 0; i < modifyColumnIndices.length; i++) {
                             row[modifyColumnIndices[i]] = newValues[i];
                         }
+                        ++count;
                     }
                     writer.write(rowToStr(row));
                     if (it.hasNext()) {
@@ -96,20 +98,21 @@ public abstract class FileOperator {
             throw new RuntimeException("Fail to write to " + filePath + ".tmp", e);
         }
         renameTempFile();
+        return count;
     }
 
-    public void deleteRows(int columnIndices, @Nullable String value) {
-        deleteRows(new int[]{columnIndices}, new String[]{value});
+    public int deleteRows(int columnIndices, @Nullable String value) {
+        return deleteRows(new int[]{columnIndices}, new String[]{value});
     }
 
-    public void deleteRows(int @NotNull [] columnIndices, @Nullable String @NotNull [] values) {
+    public int deleteRows(int @NotNull [] columnIndices, @Nullable String @NotNull [] values) {
         if (columnIndices.length == 0 || columnIndices.length != values.length) {
             throw new IllegalArgumentException(
                     "columnIndices and values must have same length");
         }
 
         int maxIndex = getMaxIndex(columnIndices);
-
+        int count = 0;
         try (FileWriter writer = new FileWriter(filePath + ".tmp")) {
             try(FileOperatorReader reader = getReader()) {
                 boolean hasWrittenFirstLine = false;
@@ -125,6 +128,8 @@ public abstract class FileOperator {
                             writer.write(System.getProperty("line.separator"));
                         }
                         writer.write(rowToStr(row));
+                    } else {
+                        ++count;
                     }
                 }
             }
@@ -135,6 +140,7 @@ public abstract class FileOperator {
             throw new RuntimeException("Fail to write to " + filePath + ".tmp", e);
         }
         renameTempFile();
+        return count;
     }
 
     public List<String[]> findRowsSatisfied(int columnIndices, @Nullable String value) {

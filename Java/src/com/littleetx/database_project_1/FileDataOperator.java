@@ -2,7 +2,6 @@ package com.littleetx.database_project_1;
 
 import com.littleetx.database_project_1.file_database.Database;
 import com.littleetx.database_project_1.file_database.Table;
-import com.littleetx.database_project_1.records.Information;
 import com.littleetx.database_project_1.records.Item;
 
 import java.util.ArrayList;
@@ -21,7 +20,7 @@ public class FileDataOperator implements IDataOperator {
     }
 
     @Override
-    public void insert(Information info) {
+    public void importData(TableInfo info) {
 
         insertInto("city", info.cities(), city -> new Object[] {
                 city.id(), city.name(), city.areaCode()});
@@ -69,18 +68,49 @@ public class FileDataOperator implements IDataOperator {
     }
 
     @Override
-    public void delete(Item item) {
+    public void delete(List<Item> itemList) {
+        List<Object> itemNameList = new ArrayList<>();
+        for (Item item : itemList) {
+            itemNameList.add(item.name());
+        }
+        delete("delivery", "item_name", itemNameList);
+        delete("export", "item_name", itemNameList);
+        delete("import", "item_name", itemNameList);
+        delete("item_via_city", "item_name", itemNameList);
+        delete("log", "item_name", itemNameList);
+        delete("retrieval", "item_name", itemNameList);
+        delete("tax_info", "item_name", itemNameList);
+        delete("item", "name", itemNameList);
+    }
 
+    private void delete(String tableName, String columns, Collection<Object> rows) {
+        //insert into tax_info
+        long t = System.currentTimeMillis();
+        Table table = database.getTable(tableName);
+        Objects.requireNonNull(table);
+        int count = 0;
+        for (Object row : rows) {
+            count += table.delete(columns, row);
+        }
+        Logger.log("Delete from " + tableName + " in: " + (System.currentTimeMillis() - t) + "ms, " +
+                "total: "  + count + " records");
     }
 
     @Override
-    public void fillInAllNullValues() {
+    public void updateItemType(String oldType, String newType) {
+        long t = System.currentTimeMillis();
+        Table table = database.getTable("item");
+        Objects.requireNonNull(table);
 
+        int count = table.update("type", oldType, "type", newType);
+        Logger.log("Update item types in: " + (System.currentTimeMillis() - t) + "ms, " +
+                "total: "  + count + " records");
     }
 
+
     @Override
-    public Item[] findUnfinishedItems() {
-        return new Item[0];
+    public List<Item> findUnfinishedItems() {
+        return null;
     }
 
 }

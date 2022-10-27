@@ -1,5 +1,6 @@
-package com.littleetx.database_project_1;
+package com.littleetx.database_project_1.execution;
 
+import com.littleetx.database_project_1.*;
 import com.littleetx.database_project_1.file_database.FileOperator;
 import com.littleetx.database_project_1.file_database.FileOperator_CSV;
 import com.littleetx.database_project_1.records.*;
@@ -16,7 +17,7 @@ public class ImportData {
 
     private static final String DataFile = "data.csv";
 
-    public static Information importData() {
+    public static TableInfo importData() {
         Map<String, City> cities = new HashMap<>();
         int cityId = 1;
         Map<String, Company> companies = new HashMap<>();
@@ -140,7 +141,7 @@ public class ImportData {
         } catch (FileNotFoundException e) {
             throw new RuntimeException("Cannot find file " + DataFile, e);
         }
-        return new Information(cities.values(), companies.values(), containers.values(),
+        return new TableInfo(cities.values(), companies.values(), containers.values(),
                 couriers.values(), deliveries, exports, imports,
                 items, itemsViaCities, logs, retrievals, ships.values(), taxInfos);
     }
@@ -150,13 +151,13 @@ public class ImportData {
         Logger.setStream(System.out);
 
         System.out.println("Loading data...");
-        Information info = importData();
+        TableInfo info = importData();
         System.out.println("Successfully import data into memory");
         System.out.println("Start to insert data into database via sql");
         long sqlStart = System.currentTimeMillis();
         IDataOperator sqlOperator = new SQLDataOperator();
         //sqlOperator.initialize();
-        sqlOperator.insert(info);
+        sqlOperator.importData(info);
         System.out.println("Insert data into database via sql finished，time cost: "
                 + (System.currentTimeMillis() - sqlStart) + "ms");
 
@@ -164,7 +165,7 @@ public class ImportData {
         long fileStart = System.currentTimeMillis();
         IDataOperator fileOperator = new FileDataOperator();
         fileOperator.initialize();
-        fileOperator.insert(info);
+        fileOperator.importData(info);
         System.out.println("Insert data into database via file finished，time cost: "
                 + (System.currentTimeMillis() - fileStart) + "ms");
     }

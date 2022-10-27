@@ -4,12 +4,12 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.littleetx.database_project_1.records.City;
-import com.littleetx.database_project_1.records.Information;
 import com.littleetx.database_project_1.records.Item;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.*;
+import java.util.List;
 
 public class SQLDataOperator implements IDataOperator {
     private static final String LoginInfoPath = "database_login.json";
@@ -54,7 +54,7 @@ public class SQLDataOperator implements IDataOperator {
 
 
     @Override
-    public void insert(Information info) {
+    public void importData(TableInfo info) {
         //insert into cities
 
     }
@@ -98,17 +98,17 @@ public class SQLDataOperator implements IDataOperator {
     }
 
     @Override
-    public void delete(Item item) {
+    public void delete(List<Item> itemList) {
 
     }
 
     @Override
-    public void fillInAllNullValues() {
+    public void updateItemType(String oldType, String newType) {
 
     }
 
     @Override
-    public Item[] findUnfinishedItems() {
-        return new Item[0];
+    public List<Item> findUnfinishedItems() {
+        return null;
     }
 }

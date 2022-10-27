@@ -1,8 +1,10 @@
-package com.littleetx.database_project_1.records;
+package com.littleetx.database_project_1;
+
+import com.littleetx.database_project_1.records.*;
 
 import java.util.Collection;
 
-public record Information(
+public record TableInfo(
         Collection<City> cities,
         Collection<Company> companies,
         Collection<Container> containers,

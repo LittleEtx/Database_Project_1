@@ -112,9 +112,9 @@ public class Table {
         return result;
     }
 
-    public void update(@NotNull String findColumns, @Nullable Object oldValue,
+    public int update(@NotNull String findColumns, @Nullable Object oldValue,
                        @NotNull String modifyColumns, @Nullable Object newValue) {
-        update(new String[]{findColumns}, new Object[]{oldValue},
+        return update(new String[]{findColumns}, new Object[]{oldValue},
                 new String[]{modifyColumns}, new Object[]{newValue});
     }
 
@@ -125,7 +125,7 @@ public class Table {
      * @param newValues new values of the findColumns
      */
 
-    public void update(@NotNull String @NotNull [] findColumns, @Nullable Object @NotNull [] oldValues,
+    public int update(@NotNull String @NotNull [] findColumns, @Nullable Object @NotNull [] oldValues,
                        @NotNull String @NotNull [] modifyColumns, @Nullable Object @NotNull [] newValues) {
         if (findColumns.length != oldValues.length || modifyColumns.length != newValues.length) {
             throw new IllegalArgumentException(
@@ -137,12 +137,12 @@ public class Table {
         int[] modifyColumnIndices = getColumnIndices(modifyColumns);
         String[] stringNewValues = objToStr(modifyColumnIndices, newValues);
 
-        fileOperator.modifyRowsTo(findColumnIndices, stringOldValues,
+        return fileOperator.modifyRowsTo(findColumnIndices, stringOldValues,
                 modifyColumnIndices, stringNewValues);
     }
 
-    public void delete(@NotNull String column, @Nullable Object value) {
-        delete(new String[]{column}, new Object[]{value});
+    public int delete(@NotNull String column, @Nullable Object value) {
+        return delete(new String[]{column}, new Object[]{value});
     }
 
     /**
@@ -150,7 +150,7 @@ public class Table {
      * @param columns columns to be deleted
      * @param values values of the columns, matched rows will be deleted
      */
-    public void delete(@NotNull String @NotNull [] columns, @Nullable Object @NotNull [] values) {
+    public int delete(@NotNull String @NotNull [] columns, @Nullable Object @NotNull [] values) {
         if (columns.length != values.length) {
             throw new IllegalArgumentException(
                     "The number of columns does not match the number of values");
@@ -159,7 +159,7 @@ public class Table {
         int[] columnIndices = getColumnIndices(columns);
         String[] stringValues = objToStr(columnIndices, values);
 
-        fileOperator.deleteRows(columnIndices, stringValues);
+        return fileOperator.deleteRows(columnIndices, stringValues);
     }
 
     private int findColumnIndex(String column) {
