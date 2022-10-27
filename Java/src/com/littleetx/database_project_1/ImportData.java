@@ -41,8 +41,7 @@ public class ImportData {
             reader.next();
             while (reader.hasNext()) {
                 String[] info = reader.next();
-                Item item = new Item(Integer.parseInt(info[ItemName]
-                        .substring(info[ItemType].length() + 1), 16),
+                Item item = new Item(info[ItemName],
                         info[ItemType], Integer.parseInt(info[ItemPrice]));
                 items.add(item);
 
@@ -156,6 +155,7 @@ public class ImportData {
         System.out.println("Start to insert data into database via sql");
         long sqlStart = System.currentTimeMillis();
         IDataOperator sqlOperator = new SQLDataOperator();
+        //sqlOperator.initialize();
         sqlOperator.insert(info);
         System.out.println("Insert data into database via sql finished，time cost: "
                 + (System.currentTimeMillis() - sqlStart) + "ms");
@@ -163,6 +163,7 @@ public class ImportData {
         System.out.println("Start to insert data into database via file");
         long fileStart = System.currentTimeMillis();
         IDataOperator fileOperator = new FileDataOperator();
+        fileOperator.initialize();
         fileOperator.insert(info);
         System.out.println("Insert data into database via file finished，time cost: "
                 + (System.currentTimeMillis() - fileStart) + "ms");

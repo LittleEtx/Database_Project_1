@@ -75,8 +75,8 @@
     {
       "columns": [
         {
-          "name": "item_id",
-          "type": "Integer"
+          "name": "item_name",
+          "type": "Varchar"
         },
         {
           "name": "date",
@@ -92,8 +92,8 @@
     {
       "columns": [
         {
-          "name": "item_id",
-          "type": "Integer"
+          "name": "item_name",
+          "type": "Varchar"
         },
         {
           "name": "date",
@@ -113,8 +113,8 @@
     {
       "columns": [
         {
-          "name": "item_id",
-          "type": "Integer"
+          "name": "item_name",
+          "type": "Varchar"
         },
         {
           "name": "date",
@@ -126,8 +126,8 @@
     {
       "columns": [
         {
-          "name":"id",
-          "type":"Integer"
+          "name":"name",
+          "type":"Varchar"
         },
         {
           "name":"type",
@@ -143,8 +143,8 @@
     {
       "columns": [
         {
-          "name": "item_id",
-          "type": "Integer"
+          "name": "item_name",
+          "type": "Varchar"
         },
         {
           "name": "retrieval_city_id",
@@ -168,8 +168,8 @@
     {
       "columns": [
         {
-          "name": "item_id",
-          "type": "Integer"
+          "name": "item_name",
+          "type": "Varchar"
         },
         {
           "name": "log_time",
@@ -181,8 +181,8 @@
     {
       "columns": [
         {
-          "name": "item_id",
-          "type": "Integer"
+          "name": "item_name",
+          "type": "Varchar"
         },
         {
           "name": "date",
@@ -215,8 +215,8 @@
     {
       "columns": [
         {
-          "name": "item_id",
-          "type": "Integer"
+          "name": "item_name",
+          "type": "Varchar"
         },
         {
           "name": "export_rate",

@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 //entity
 public record Item(
-        int id, //primary key
+        @NotNull String name, //primary key
         @NotNull String type,
         int price
 ) {

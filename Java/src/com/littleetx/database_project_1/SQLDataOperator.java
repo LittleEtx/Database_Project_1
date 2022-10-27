@@ -3,11 +3,9 @@ package com.littleetx.database_project_1;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.littleetx.database_project_1.file_database.jsonTypes.DatabaseInfo;
 import com.littleetx.database_project_1.records.City;
 import com.littleetx.database_project_1.records.Information;
 import com.littleetx.database_project_1.records.Item;
-import com.littleetx.database_project_1.records.Log;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,7 +15,8 @@ public class SQLDataOperator implements IDataOperator {
     private static final String LoginInfoPath = "database_login.json";
     private Connection con;
 
-    public void connect() {
+    @Override
+    public void initialize() {
         File file = new File(LoginInfoPath);
         LoginInfo info;
         JsonFactory jf = new JsonFactory();
