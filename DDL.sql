@@ -1,22 +1,22 @@
 create table item(
-    name int primary key ,
+    name varchar primary key ,
     type varchar,
     price int
 );
 create table company(
     id int primary key ,
-    name varchar
+    name varchar unique
 );
 
 create table city(
     id int primary key ,
-    area_code int ,
-    name varchar
+    area_code int unique,
+    name varchar unique
 );
 
 create table ship(
     id int primary key,
-    name varchar,
+    name varchar unique ,
     company_id int references company(id)
 );
 
@@ -35,14 +35,14 @@ create table courier(
 );
 
 create table tax_info(
-    item_name int primary key references item(name),
+    item_name varchar primary key references item(name),
     export_tax decimal(30,15),
     import_tax decimal(30,15)
 );
 
 
 create table route(
-    item_name int primary key references item(name),
+    item_name varchar primary key references item(name),
     retrieval_city int references city(id),
     export_city_id int references city(id),
     import_city_id int references city(id),
@@ -50,30 +50,30 @@ create table route(
 );
 
 create table logs(
-    item_name int primary key references item(name),
-    log_time date
+    item_name varchar primary key references item(name),
+    log_time timestamp
 );
 
 create table retrieve(
-    item_name int primary key references item(name),
+    item_name varchar primary key references item(name),
     courier_id int references courier(id),
     start_date date
 );
 
 create table delivery(
-    item_name int primary key references item(name),
+    item_name varchar primary key references item(name),
     courier_id int references courier(id),
     finish_date date
 );
 
 create table export(
-     item_name int primary key references item(name),
+     item_name varchar primary key references item(name),
     ship_id int references ship(id),
     container_code varchar references container(code),
     export_date date
 );
 
 create table import(
-    item_name int primary key references item(name),
+    item_name varchar primary key references item(name),
      import_date date
 );
