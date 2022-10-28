@@ -366,6 +366,7 @@ public class SQLDataOperator implements IDataOperator {
             System.out.println(count + " records successfully loaded");
             System.out.println("Loading speed : " + (count * 1000)/(end - start) + " records/s");
 
+            stmt.close();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
