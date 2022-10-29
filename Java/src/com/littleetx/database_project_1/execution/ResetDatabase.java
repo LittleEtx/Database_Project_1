@@ -1,7 +1,8 @@
 package com.littleetx.database_project_1.execution;
 
+import com.littleetx.database_project_1.SQLDataOperator;
+
 import java.io.File;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,15 +19,21 @@ public class ResetDatabase {
         files.add(new File("database/item.csv"));
         files.add(new File("database/item_via_city.csv"));
         files.add(new File("database/log.csv"));
+        files.add(new File("database/retrieval.csv"));
         files.add(new File("database/ship.csv"));
         files.add(new File("database/tax_info.csv"));
 
+        for (File file : files) {
+            if (file.exists()) {
+                file.delete();
+            }
+        }
 
-        Statement statement = null;
+        SQLDataOperator sqlOperator = new SQLDataOperator();
+        sqlOperator.initialize();
+        sqlOperator.resetTables();
+        sqlOperator.disconnect();
 
-
-
+        System.out.println("Database reset.");
     }
-
-
 }

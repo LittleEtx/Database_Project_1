@@ -55,9 +55,21 @@ public class SQLDataOperator implements IDataOperator {
 
     public void resetTables() {
         try (Statement stmt = con.createStatement()) {
-            stmt.executeUpdate("DROP TABLE IF EXISTS items");
-            stmt.executeUpdate("CREATE TABLE items (name VARCHAR(255), type VARCHAR(255), price INTEGER)");
-        } catch (SQLException e) {
+            File drop = new File("dropTables.sql");
+            SQLReader reader = new SQLReader(drop);
+            for (String sql : reader) {
+                stmt.execute(sql);
+            }
+            reader.close();
+
+            File create = new File("DDL.sql");
+            reader = new SQLReader(create);
+            for (String sql : reader) {
+                stmt.execute(sql);
+            }
+            reader.close();
+
+        } catch (Exception e) {
             System.err.println("Database reset failed");
             System.err.println(e.getMessage());
             System.exit(1);
@@ -177,7 +189,7 @@ public class SQLDataOperator implements IDataOperator {
                 }
             });
 
-            String imLogs="insert into logs (item_name, log_time) " +
+            String imLogs="insert into log (item_name, log_time) " +
                     "values (?, ?)";
             PreparedStatement logsStm = con.prepareStatement(imLogs);
             insertData(logsStm, info.logs(), (stm, logs) -> {
@@ -189,7 +201,7 @@ public class SQLDataOperator implements IDataOperator {
                 }
             });
 
-            String imRetrieve="insert into retrieve (item_name, courier_id, start_date) " +
+            String imRetrieve="insert into retrieval (item_name, courier_id, start_date) " +
                     "values (?, ?, ?)";
             PreparedStatement retrieveStm = con.prepareStatement(imRetrieve);
             insertData(retrieveStm, info.retrieves(), (stm, retrieve) -> {
@@ -288,7 +300,7 @@ public class SQLDataOperator implements IDataOperator {
             String dlDelivery = "delete from delivery where item_name in (?)";
             deleteFrom(con.prepareStatement(dlDelivery), itemList);
 
-            String dlRetrieve = "delete from retrieve where item_name in (?)";
+            String dlRetrieve = "delete from retrieval where item_name in (?)";
             deleteFrom(con.prepareStatement(dlRetrieve), itemList);
 
             String dlRoute = "delete from item_via_city where item_name in (?)";
@@ -297,7 +309,7 @@ public class SQLDataOperator implements IDataOperator {
             String dlTaxInfo = "delete from tax_info where item_name in (?)";
             deleteFrom(con.prepareStatement(dlTaxInfo), itemList);
 
-            String dlLog = "delete from logs where item_name in (?)";
+            String dlLog = "delete from log where item_name in (?)";
             deleteFrom(con.prepareStatement(dlLog), itemList);
 
             String dlItem = "delete from item where name in (?)";
@@ -315,6 +327,7 @@ public class SQLDataOperator implements IDataOperator {
                 stm.executeUpdate();
                 stm.clearBatch();
             }
+            stm.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -322,7 +335,16 @@ public class SQLDataOperator implements IDataOperator {
 
     @Override
     public void updateItemType(String oldType, String newType) {
-
+        try {
+            String update = "update item set type = ? where type = ?";
+            PreparedStatement stm = con.prepareStatement(update);
+            stm.setString(1, newType);
+            stm.setString(2, oldType);
+            stm.executeUpdate();
+            stm.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

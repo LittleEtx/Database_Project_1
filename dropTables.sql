@@ -1,6 +1,6 @@
 drop table if exists export;
 drop table if exists import;
-drop table if exists retrieve;
+drop table if exists retrieval;
 drop table if exists delivery;
 drop table if exists tax_info;
 drop table if exists item_via_city;
@@ -11,17 +11,3 @@ drop table if exists container;
 drop table if exists courier;
 drop table if exists ship;
 drop table if exists company;
-
-delete from export;
-delete from import;
-delete from retrieve;
-delete from delivery;
-delete from tax_info;
-delete from item_via_city;
-delete from log;
-delete from item;
-delete from city;
-delete from container;
-delete from courier;
-delete from ship;
-delete from company;

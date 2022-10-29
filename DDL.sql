@@ -54,7 +54,7 @@ create table log(
     log_time timestamp
 );
 
-create table retrieve(
+create table retrieval(
     item_name varchar primary key references item(name),
     courier_id int references courier(id),
     start_date date
