@@ -3,13 +3,20 @@ package com.littleetx.database_project_1;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.littleetx.database_project_1.records.Company;
+import com.littleetx.database_project_1.records.Courier;
 import com.littleetx.database_project_1.records.Item;
+import com.littleetx.database_project_1.records.Ship;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BiConsumer;
 
 public class SQLDataOperator implements IDataOperator {
@@ -101,7 +108,7 @@ public class SQLDataOperator implements IDataOperator {
                 try {
                     stm.setInt(1,city.id());
                     stm.setString(2,city.areaCode());
-                    stm.setString(3,city.name());;
+                    stm.setString(3,city.name());
                 } catch (SQLException e) {
                     throw new RuntimeException("Wrong parameter!", e);
                 }
@@ -289,7 +296,7 @@ public class SQLDataOperator implements IDataOperator {
     }
 
     @Override
-    public void delete(List<Item> itemList) {
+    public void delete(Collection<Item> itemList) {
         try {
             String dlExport = "delete from export where item_name in (?)";
             deleteFrom(con.prepareStatement(dlExport), itemList);
@@ -320,14 +327,18 @@ public class SQLDataOperator implements IDataOperator {
         }
     }
 
-    private void deleteFrom(PreparedStatement stm, List<Item> itemList) {
+    private void deleteFrom(PreparedStatement stm, Collection<Item> itemList) {
+        long start = System.currentTimeMillis();
         try {
             for (Item item : itemList) {
                 stm.setString(1, item.name());
                 stm.executeUpdate();
-                stm.clearBatch();
             }
             stm.close();
+            long time = System.currentTimeMillis() - start;
+            Logger.log(itemList.size() + " records successfully deleted from " +
+                    stm.toString().split(" ")[2] + " in " + time + " ms, speed: " +
+                    String.format("%.4f", ((double) itemList.size())/time) + " records/ms");
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -348,7 +359,67 @@ public class SQLDataOperator implements IDataOperator {
     }
 
     @Override
-    public List<Item> findUnfinishedItems() {
+    public Collection<Item> findUnfinishedItems(FindType type) {
+        Map<String, Item> result = getAllItems();
+        try {
+            if (type == FindType.DeleteIfFind) {
+                PreparedStatement delivery = con.prepareStatement(
+                        "select from delivery where item_name = ?");
+                for (String str : result.keySet()) {
+                    delivery.setString(1, str);
+                    ResultSet rs1 = delivery.executeQuery();
+                    if (rs1.next()) {
+                        result.remove(str);
+                    }
+                    delivery.close();
+                }
+            } else {
+                PreparedStatement delivery = con.prepareStatement(
+                        "select * from delivery");
+                ResultSet rs1 = delivery.executeQuery();
+                while (rs1.next()) {
+                    String name = rs1.getString("item_name");
+                    result.remove(name);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return result.values();
+    }
+
+    @Override
+    public Map<Ship, LocalDate> findShipServiceYear() {
         return null;
+    }
+
+    @Override
+    public Map<Courier, Integer> findCourierTransportItemCount(CourierType type) {
+        return null;
+    }
+
+    @Override
+    public Map<String, BigDecimal> getMinExportRate(Company company) {
+        return null;
+    }
+
+    @NotNull
+    @Override
+    public Map<String, Item> getAllItems() {
+        Map<String, Item> result = new HashMap<>();
+        try {
+            PreparedStatement stm = con.prepareStatement("select * from item");
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                String name = rs.getString("name");
+                result.put(name, new Item(rs.getString("name"),
+                        rs.getString("type"), rs.getInt("price")));
+            }
+            stm.close();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return result;
     }
 }

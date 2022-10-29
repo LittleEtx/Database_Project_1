@@ -2,12 +2,15 @@ package com.littleetx.database_project_1;
 
 import com.littleetx.database_project_1.file_database.Database;
 import com.littleetx.database_project_1.file_database.Table;
+import com.littleetx.database_project_1.records.Company;
+import com.littleetx.database_project_1.records.Courier;
 import com.littleetx.database_project_1.records.Item;
+import com.littleetx.database_project_1.records.Ship;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.function.Function;
 
 public class FileDataOperator implements IDataOperator {
@@ -18,7 +21,6 @@ public class FileDataOperator implements IDataOperator {
         database = new Database();
         database.initialize();
     }
-
     private long packageSize;
     @Override
     public void importData(TableInfo info, long packageSize) {
@@ -78,7 +80,7 @@ public class FileDataOperator implements IDataOperator {
     }
 
     @Override
-    public void delete(List<Item> itemList) {
+    public void delete(Collection<Item> itemList) {
         List<Object> itemNameList = new ArrayList<>();
         for (Item item : itemList) {
             itemNameList.add(item.name());
@@ -102,8 +104,9 @@ public class FileDataOperator implements IDataOperator {
         for (Object row : rows) {
             count += table.delete(columns, row);
         }
-        Logger.log("Delete from " + tableName + " in: " + (System.currentTimeMillis() - t) + "ms, " +
-                "total: "  + count + " records");
+        long time = System.currentTimeMillis() - t;
+        Logger.log("Delete from " + tableName + " in: " + time + "ms, " +
+                "total: "  + count + " records, speed: " + String.format("%.4f", ((double) count) / time) + " records/ms");
     }
 
     @Override
@@ -111,16 +114,99 @@ public class FileDataOperator implements IDataOperator {
         long t = System.currentTimeMillis();
         Table table = database.getTable("item");
         Objects.requireNonNull(table);
-
+        long time = System.currentTimeMillis() - t;
         int count = table.update("type", oldType, "type", newType);
-        Logger.log("Update item types in: " + (System.currentTimeMillis() - t) + "ms, " +
-                "total: "  + count + " records");
+        Logger.log("Update item types in: " + time + "ms, " +
+                "total: "  + count + " records, speed: " + String.format("%.4f", ((double) count) / time) + " records/ms");
     }
 
 
     @Override
-    public List<Item> findUnfinishedItems() {
+    public Collection<Item> findUnfinishedItems(FindType type) {
+        long t = System.currentTimeMillis();
+        Map<String, Item> allItems = getAllItems();
+
+        Table table = database.getTable("delivery");
+        Objects.requireNonNull(table);
+        if (type == FindType.DeleteIfFind) {
+            for (String s : allItems.keySet()) {
+                if (!table.select("item_name", s).isEmpty()) {
+                    allItems.remove(s);
+                }
+            }
+        } else {
+            for (Object[] row : table.select()) {
+                String itemName = (String) row[0];
+                allItems.remove(itemName);
+            }
+        }
+
+        long time = System.currentTimeMillis() - t;
+        Logger.log("Find unfinished items in: " + time + "ms, " +
+                "total: "  + allItems.size() + " records, speed: " + String.format("%.4f", ((double) allItems.size()) / time) + " records/ms");
+
+        return allItems.values();
+    }
+
+    @Override
+    public Map<Ship, LocalDate> findShipServiceYear() {
+        HashMap<Integer, Company> companies = new HashMap<>();
+        Table companyTable = database.getTable("company");
+        Objects.requireNonNull(companyTable);
+        for (Object[] row : companyTable.select()) {
+            companies.put((Integer) row[0], new Company((Integer) row[0], (String) row[1]));
+        }
+
+        Map<Integer, Ship> ships = new HashMap<>();
+        Table shipTable = database.getTable("ship");
+        Objects.requireNonNull(shipTable);
+        for (Object[] row : shipTable.select()) {
+            int id = (int) row[0];
+            Ship ship = new Ship(id, (String) row[1], companies.get((int) row[2]));
+            ships.put(id, ship);
+        }
+
+        HashMap<Ship, LocalDate> shipServiceYear = new HashMap<>();
+        Table exportTable = database.getTable("export");
+        //read all export records for once
+        Objects.requireNonNull(exportTable);
+        for (Object[] row : exportTable.select()) {
+            Ship ship = ships.get((int) row[3]);
+            if (shipServiceYear.containsKey(ship)) {
+                if (shipServiceYear.get(ship).compareTo((LocalDate) row[2]) > 0) {
+                    shipServiceYear.put(ship, (LocalDate) row[2]);
+                }
+            } else {
+                shipServiceYear.put(ship, (LocalDate) row[2]);
+            }
+        }
+        return shipServiceYear;
+    }
+
+    @Override
+    public Map<Courier, Integer> findCourierTransportItemCount(CourierType type) {
+        Map<Integer, Courier> couriers = new HashMap<>();
+        Table courierTable = database.getTable("courier");
+        Objects.requireNonNull(courierTable);
         return null;
+    }
+
+    @Override
+    public Map<String, BigDecimal> getMinExportRate(Company company) {
+        return null;
+    }
+
+    @NotNull
+    @Override
+    public Map<String, Item> getAllItems() {
+        Table itemTable = database.getTable("item");
+        Objects.requireNonNull(itemTable);
+        Map<String, Item> allItems = new HashMap<>();
+        for (Object[] row : itemTable.select()) {
+            String itemName = (String) row[0];
+            allItems.put(itemName, new Item(itemName, (String) row[1], (int) row[2]));
+        }
+        return allItems;
     }
 
 }

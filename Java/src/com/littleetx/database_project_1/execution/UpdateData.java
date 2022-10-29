@@ -3,17 +3,41 @@ package com.littleetx.database_project_1.execution;
 import com.littleetx.database_project_1.FileDataOperator;
 import com.littleetx.database_project_1.IDataOperator;
 import com.littleetx.database_project_1.Logger;
+import com.littleetx.database_project_1.SQLDataOperator;
 
 public class UpdateData {
+    private static final String preType = "strawberry";
+    private static final String newType = "blueberry";
+
     public static void main(String[] args) {
         Logger.setStream(System.out);
 
-        IDataOperator fileOperator = new FileDataOperator();
-        fileOperator.initialize();
-        System.out.println("Updating item type from strawberry to blueberry...");
-        fileOperator.updateItemType("strawberry", "blueberry");
+        update(new FileDataOperator(), "File");
+        update(new SQLDataOperator(), "SQL");
+    }
 
-        System.out.println("Updating item type from blueberry to strawberry...");
-        fileOperator.updateItemType("strawberry", "blueberry");
+    private static void update(IDataOperator dataOperator, String name) {
+        dataOperator.initialize();
+        var itemSet = dataOperator.getAllItems();
+        int count = 0;
+        for (var item : itemSet.values()) {
+            if (item.type().equals(preType)) {
+                count++;
+            }
+        }
+
+        System.out.println("Update " + name +", affecting rows: " + count);
+        long startTime = System.currentTimeMillis();
+        System.out.println("Updating item type from " + preType + " to " + newType + "...");
+        dataOperator.updateItemType(preType, newType);
+        long time = System.currentTimeMillis() - startTime;
+        System.out.println("Updated in " + time + "ms, speed: " +
+                String.format("%.4f", ((double) count) / time) + " records/s");
+
+        startTime = System.currentTimeMillis();
+        System.out.println("Updating item type from " + preType + " to " + newType + "...");
+        dataOperator.updateItemType(preType, newType);
+        System.out.println("Updated in " + (System.currentTimeMillis() - startTime) + "ms, speed: " +
+                String.format("%.4f", ((double) count) / time) + " records/s");
     }
 }

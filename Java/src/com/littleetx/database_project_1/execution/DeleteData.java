@@ -4,61 +4,67 @@ import com.littleetx.database_project_1.FileDataOperator;
 import com.littleetx.database_project_1.IDataOperator;
 import com.littleetx.database_project_1.Logger;
 import com.littleetx.database_project_1.SQLDataOperator;
-import com.littleetx.database_project_1.file_database.FileOperator;
-import com.littleetx.database_project_1.file_database.FileOperator_CSV;
 import com.littleetx.database_project_1.records.Item;
 
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
-
-import static com.littleetx.database_project_1.DataIndexMapping.*;
+import java.util.*;
 
 public class DeleteData {
-    private static final String DataFile = "data.csv";
+    private static final int sqlDeleteCount = 100000;
+    private static final int fileDeleteCount = 25;
 
     public static void main(String[] args) {
         Logger.setStream(System.out);
+        SQLDataOperator sqlOperator = new SQLDataOperator();
+        sqlOperator.initialize();
+        deleteFrom(sqlOperator, sqlDeleteCount, "SQL");
 
         IDataOperator fileOperator = new FileDataOperator();
         fileOperator.initialize();
-        IDataOperator sqlOperator = new SQLDataOperator();
-        sqlOperator.initialize();
+        deleteFrom(fileOperator, fileDeleteCount, "File");
+    }
 
-        System.out.println("Loading data...");
-        List<Item> itemList = readRandomItems(0.00005);
+    private static void deleteFrom(IDataOperator dataOperator, int count, String name) {
+        System.out.println("Loading data from " + name + "...");
+        var itemSet = dataOperator.getAllItems();
+
+        Collection<Item> itemList = getItemList(itemSet.values(), count);
         System.out.println("Loaded " + itemList.size() + " items.");
 
         long sqlStart = System.currentTimeMillis();
-        sqlOperator.delete(itemList);
-        System.out.println("SQL deleted " + itemList.size() + " items in " +
+        dataOperator.delete(itemList);
+        System.out.println(name + " deleted " + itemList.size() + " records in " +
                 (System.currentTimeMillis() - sqlStart) + "ms.");
-
-        long fileStart = System.currentTimeMillis();
-        fileOperator.delete(itemList);
-        System.out.println("File database deleted " + itemList.size() + " items in " +
-                (System.currentTimeMillis() - fileStart) + "ms.");
     }
 
-    private static List<Item> readRandomItems(double ration) {
+
+    private static Collection<Item> getItemList(Collection<Item> items, int count) {
         List<Item> result = new ArrayList<>();
-        FileOperator fileOperator = new FileOperator_CSV(DataFile);
         Random random = new Random();
-        try {
-            Iterator<String[]> reader = fileOperator.getReader().iterator();
-            reader.next();
-            while (reader.hasNext()) {
-                String[] infos = reader.next();
-                if (random.nextDouble() < ration) {
-                    result.add(new Item(infos[ItemName], infos[ItemType],
-                            Integer.parseInt(infos[ItemPrice])));
-                }
+
+        Set<Integer> randomSet = new HashSet<>();
+        int i = 0;
+        while (i < count) {
+            int value = random.nextInt(items.size());
+            if (randomSet.add(value)) {
+                i++;
             }
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
         }
+        Integer[] randomList = randomSet.toArray(new Integer[0]);
+        Arrays.sort(randomList);
+
+        i = 0;
+        int j = 0;
+        for (Item item : items) {
+            if (i >= count) {
+                break;
+            }
+            if (j == randomList[i]) {
+                result.add(item);
+                i++;
+            }
+            j++;
+        }
+
         return result;
     }
 }

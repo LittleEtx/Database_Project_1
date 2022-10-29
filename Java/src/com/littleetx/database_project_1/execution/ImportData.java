@@ -13,12 +13,12 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static com.littleetx.database_project_1.DataIndexMapping.*;
+import static com.littleetx.database_project_1.execution.Environment.DataFile;
 
 public class ImportData {
 
-    private static final String DataFile = "data.csv";
     private static final int dataSize = 500000;
-    private static final long packageSize = 100;
+    private static final long packageSize = Long.MAX_VALUE;
 
     public static TableInfo importData() {
         Map<String, City> cities = new HashMap<>();
