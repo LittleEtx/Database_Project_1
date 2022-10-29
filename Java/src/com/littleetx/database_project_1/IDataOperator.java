@@ -1,9 +1,6 @@
 package com.littleetx.database_project_1;
 
-import com.littleetx.database_project_1.records.Company;
-import com.littleetx.database_project_1.records.Courier;
-import com.littleetx.database_project_1.records.Item;
-import com.littleetx.database_project_1.records.Ship;
+import com.littleetx.database_project_1.records.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -26,6 +23,6 @@ public interface IDataOperator {
     enum CourierType {
         Retrieval, Delivery
     }
-    Map<Courier, Integer> findCourierTransportItemCount(CourierType type);
+    Map<City, Courier> findBestCourierForCities(CourierType type);
     Map<String, BigDecimal> getMinExportRate(Company company);
 }

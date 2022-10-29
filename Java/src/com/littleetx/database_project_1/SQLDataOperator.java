@@ -3,10 +3,7 @@ package com.littleetx.database_project_1;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.littleetx.database_project_1.records.Company;
-import com.littleetx.database_project_1.records.Courier;
-import com.littleetx.database_project_1.records.Item;
-import com.littleetx.database_project_1.records.Ship;
+import com.littleetx.database_project_1.records.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -394,7 +391,7 @@ public class SQLDataOperator implements IDataOperator {
     }
 
     @Override
-    public Map<Courier, Integer> findCourierTransportItemCount(CourierType type) {
+    public Map<City, Courier> findBestCourierForCities(CourierType type) {
         return null;
     }
 

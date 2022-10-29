@@ -2,10 +2,7 @@ package com.littleetx.database_project_1;
 
 import com.littleetx.database_project_1.file_database.Database;
 import com.littleetx.database_project_1.file_database.Table;
-import com.littleetx.database_project_1.records.Company;
-import com.littleetx.database_project_1.records.Courier;
-import com.littleetx.database_project_1.records.Item;
-import com.littleetx.database_project_1.records.Ship;
+import com.littleetx.database_project_1.records.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
@@ -150,21 +147,12 @@ public class FileDataOperator implements IDataOperator {
 
     @Override
     public Map<Ship, LocalDate> findShipServiceYear() {
-        HashMap<Integer, Company> companies = new HashMap<>();
-        Table companyTable = database.getTable("company");
-        Objects.requireNonNull(companyTable);
-        for (Object[] row : companyTable.select()) {
-            companies.put((Integer) row[0], new Company((Integer) row[0], (String) row[1]));
-        }
+        HashMap<Integer, Company> companies = getCompanies();
 
-        Map<Integer, Ship> ships = new HashMap<>();
-        Table shipTable = database.getTable("ship");
-        Objects.requireNonNull(shipTable);
-        for (Object[] row : shipTable.select()) {
-            int id = (int) row[0];
-            Ship ship = new Ship(id, (String) row[1], companies.get((int) row[2]));
-            ships.put(id, ship);
-        }
+        Map<Integer, Ship> ships = getAllInfos("ship",
+                row -> (int) row[0],
+                row -> new Ship((int) row[0], (String) row[1], companies.get((int) row[2])
+        ));
 
         HashMap<Ship, LocalDate> shipServiceYear = new HashMap<>();
         Table exportTable = database.getTable("export");
@@ -172,22 +160,57 @@ public class FileDataOperator implements IDataOperator {
         Objects.requireNonNull(exportTable);
         for (Object[] row : exportTable.select()) {
             Ship ship = ships.get((int) row[3]);
+            LocalDate date = (LocalDate) row[1];
             if (shipServiceYear.containsKey(ship)) {
-                if (shipServiceYear.get(ship).compareTo((LocalDate) row[2]) > 0) {
-                    shipServiceYear.put(ship, (LocalDate) row[2]);
+                if (shipServiceYear.get(ship).compareTo(date) > 0) {
+                    shipServiceYear.put(ship, date);
                 }
             } else {
-                shipServiceYear.put(ship, (LocalDate) row[2]);
+                shipServiceYear.put(ship, date);
             }
         }
         return shipServiceYear;
     }
 
-    @Override
-    public Map<Courier, Integer> findCourierTransportItemCount(CourierType type) {
-        Map<Integer, Courier> couriers = new HashMap<>();
-        Table courierTable = database.getTable("courier");
-        Objects.requireNonNull(courierTable);
+    public Map<City, Courier> findBestCourierForCities(CourierType type) {
+        Map<Integer, Company> companies = getCompanies();
+        Map<Integer, Courier> couriers = getAllInfos("courier",
+                row -> (int) row[0],
+                row -> new Courier((int) row[0], (String) row[1], (String) row[2],
+                        (String) row[3], (LocalDate) row[4], companies.get((int) row[5])
+        ));
+
+        //TODO: use city and courier to find the best courier for each city
+        Table cites;
+
+        class CityCourier {
+            public final City city;
+            public final Courier courier;
+            public int count;
+
+            public CityCourier(City city, Courier courier, int count) {
+                this.city = city;
+                this.courier = courier;
+                this.count = count;
+            }
+        }
+
+        Map<Courier, CityCourier> courierTransportItemCount = new HashMap<>();
+        for (Courier courier : couriers.values()) {
+            courierTransportItemCount.put(courier, new CityCourier(null, courier, 0));
+        }
+
+
+        Table table;
+        if (type == CourierType.Delivery) {
+            table = database.getTable("delivery");
+        } else {
+            table = database.getTable("retrieval");
+        }
+        for (Object[] row : Objects.requireNonNull(table).select()) {
+            Courier courier = couriers.get((int) row[2]);
+            //courierTransportItemCount.put(courier, courierTransportItemCount.get(courier) + 1);
+        }
         return null;
     }
 
@@ -196,17 +219,29 @@ public class FileDataOperator implements IDataOperator {
         return null;
     }
 
+    private <I, T> HashMap<I, T> getAllInfos(String tableName, Function<Object[], I> key,
+                                             Function<Object[], T> constructor) {
+        HashMap<I, T> map = new HashMap<>();
+        Table table = database.getTable(tableName);
+        Objects.requireNonNull(table);
+        for (Object[] row : table.select()) {
+            map.put(key.apply(row), constructor.apply(row));
+        }
+        return map;
+    }
+
+    @NotNull
+    private HashMap<Integer, Company> getCompanies() {
+        return getAllInfos("company",
+                row -> (int) row[0],
+                row -> new Company((Integer) row[0], (String) row[1]));
+    }
+
     @NotNull
     @Override
     public Map<String, Item> getAllItems() {
-        Table itemTable = database.getTable("item");
-        Objects.requireNonNull(itemTable);
-        Map<String, Item> allItems = new HashMap<>();
-        for (Object[] row : itemTable.select()) {
-            String itemName = (String) row[0];
-            allItems.put(itemName, new Item(itemName, (String) row[1], (int) row[2]));
-        }
-        return allItems;
+        return getAllInfos("item",
+                row -> (String) row[0],
+                row -> new Item((String) row[0], (String) row[1], (int) row[2]));
     }
-
 }
