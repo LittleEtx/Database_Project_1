@@ -47,7 +47,7 @@ public class FileDataOperator implements IDataOperator {
                 itemViaCity.exportCity().id(), itemViaCity.importCity().id(), itemViaCity.deliveryCity().id()});
         insertInto("log", info.logs(), log -> new Object[] {
                 log.item().name(), log.logTime()});
-        insertInto("retrieval", info.retrievals(), retrieval -> new Object[] {
+        insertInto("retrieval", info.retrieves(), retrieval -> new Object[] {
                 retrieval.item().name(), retrieval.date(), retrieval.courier().id()});
         insertInto("tax_info", info.taxInfos(), taxInfo -> new Object[] {
                 taxInfo.item().name(), taxInfo.exportRate(), taxInfo.importRate()});
@@ -63,8 +63,9 @@ public class FileDataOperator implements IDataOperator {
             infoList.add(getField.apply(info));
         }
         table.insert(infoList);
-        Logger.log("Insert into " + tableName + " in: " + (System.currentTimeMillis() - t) + "ms, " +
-                "total: "  + infoList.size() + " records");
+        long time = System.currentTimeMillis() - t;
+        Logger.log("Insert into " + tableName + " in: " + time + "ms, " +
+                "total: "  + infoList.size() + " records, speed: " + infoList.size() / time + " records/ms");
     }
 
     @Override

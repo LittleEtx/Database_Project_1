@@ -15,7 +15,7 @@ public record TableInfo(
         Collection<Item> items,
         Collection<ItemViaCity> itemsViaCities,
         Collection<Log> logs,
-        Collection<Retrieval> retrievals,
+        Collection<Retrieve> retrieves,
         Collection<Ship> ships,
         Collection<TaxInfo> taxInfos
 ) {

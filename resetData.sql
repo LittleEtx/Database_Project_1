@@ -1,0 +1,27 @@
+drop table export;
+drop table import;
+drop table retrieve;
+drop table delivery;
+drop table tax_info;
+drop table item_via_city;
+drop table logs;
+drop table item;
+drop table city;
+drop table container;
+drop table courier;
+drop table ship;
+drop table company;
+
+delete from export;
+delete from import;
+delete from retrieve;
+delete from delivery;
+delete from tax_info;
+delete from item_via_city;
+delete from logs;
+delete from item;
+delete from city;
+delete from container;
+delete from courier;
+delete from ship;
+delete from company;

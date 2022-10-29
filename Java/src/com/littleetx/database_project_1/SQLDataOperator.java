@@ -1,13 +1,16 @@
 package com.littleetx.database_project_1;
+
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.littleetx.database_project_1.records.*;
+import com.littleetx.database_project_1.records.Item;
+
 import java.io.File;
 import java.io.IOException;
 import java.sql.*;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 public class SQLDataOperator implements IDataOperator {
     private static final String LoginInfoPath = "database_login.json";
@@ -52,369 +55,212 @@ public class SQLDataOperator implements IDataOperator {
 
     @Override
     public void importData(TableInfo info){
-        String imItem = "insert into item (name,type,price) " +
-                "values (?,?,?)";
-        String imCity = "insert into city (id,area_code,name) " +
-                "values (?,?,?)";
-        String imCompany="insert into company (id,name) " +
-                "values (?,?)";
-        String imContainer="insert into container (code,type) " +
-                "values (?,?)";
-        String imShip="insert into ship (id,name,company_id) " +
-                "values (?,?,?)";
-        String imcourier="insert into courier (id,name,gender,phone_number,birth_year,company_id) " +
-                "values (?,?,?,?,?,?)";
-        String imTax_info="insert into tax_info (item_name,export_tax,import_tax) " +
-                "values (?,?,?)";
-        String imRoute="insert into route (item_id, retrieval_city,export_city_id,import_city_id,delivery_city_id) " +
-                "values (?,?,?,?,?)";
-        String imLogs="insert into logs (item_name,log_time) " +
-                "values (?,?)";
-        String imRetrieve="insert into retrieve (item_name,courier_id,start_date) " +
-                "values (?,?,?)";
-        String imDelivery="insert into delivery (item_name,courier_id,finish_date) " +
-                "values (?,?,?)";
-        String imExport="insert into export (item_name, ship_id,container_code,export_date) " +
-                "values (?,?,?,?)";
-        String imImport="insert into import (item_name, import_date) " +
-                "values (?,?)";
-        try{
-            long start,end;
-            start = System.currentTimeMillis();
-            PreparedStatement stmt = con.prepareStatement(imItem);
-            int count=0;
-            for ( Item temp: info.items()) {//item
-                stmt.setString(1,temp.name());
-                stmt.setString(2,temp.type());
-                stmt.setInt(3,temp.price());
-                count++;
-                stmt.addBatch();
-                if (count%1000==0){
-                    stmt.executeBatch();
-                    stmt.clearBatch();
-                }
-        }
-            if (count%1000!=0){
-                stmt.executeBatch();
-            }
-            stmt.clearBatch();
-            end = System.currentTimeMillis();
-            System.out.println(count + " records successfully loaded");
-            System.out.println("Loading speed : " + (count * 1000)/(end - start) + " records/s");
-
-            start = System.currentTimeMillis();
-           stmt = con.prepareStatement(imCity);
-            count=0;
-            for ( City temp: info.cities()) {//city
-                stmt.setInt(1,temp.id());
-                stmt.setString(2,temp.areaCode());
-                stmt.setString(3,temp.name());
-                count++;
-                stmt.addBatch();
-                if (count%1000==0){
-                    stmt.executeBatch();
-                    stmt.clearBatch();
-                }
-            }
-            if (count%1000!=0){
-                stmt.executeBatch();
-            }
-            stmt.clearBatch();
-            end = System.currentTimeMillis();
-            System.out.println(count + " records successfully loaded");
-            System.out.println("Loading speed : " + (count * 1000)/(end - start) + " records/s");
-
-            start = System.currentTimeMillis();
-            stmt = con.prepareStatement(imCompany);
-            count=0;
-            for ( Company temp: info.companies()) {//company (id,name)
-                stmt.setInt(1,temp.id());
-                stmt.setString(2,temp.name());
-                count++;
-                stmt.addBatch();
-                if (count%1000==0){
-                    stmt.executeBatch();
-                    stmt.clearBatch();
-                }
-            }
-            if (count%1000!=0){
-                stmt.executeBatch();
-            }
-            stmt.clearBatch();
-            end = System.currentTimeMillis();
-            System.out.println(count + " records successfully loaded");
-            System.out.println("Loading speed : " + (count * 1000)/(end - start) + " records/s");
-
-            start = System.currentTimeMillis();
-            stmt = con.prepareStatement(imContainer);
-            count=0;
-            for ( Container temp: info.containers()) {// container (code,type)
-                stmt.setString(1,temp.code());
-                stmt.setString(2,temp.type());
-                count++;
-                stmt.addBatch();
-                if (count%1000==0){
-                    stmt.executeBatch();
-                    stmt.clearBatch();
-                }
-            }
-            if (count%1000!=0){
-                stmt.executeBatch();
-            }
-            stmt.clearBatch();
-            end = System.currentTimeMillis();
-            System.out.println(count + " records successfully loaded");
-            System.out.println("Loading speed : " + (count * 1000)/(end - start) + " records/s");
-
-            start = System.currentTimeMillis();
-            stmt = con.prepareStatement(imShip);
-            count=0;
-            for ( Ship temp: info.ships()) {// ship (id,name,company_id)
-                stmt.setInt(1,temp.id());
-                stmt.setString(2,temp.name());
-                stmt.setInt(3,temp.company().id());
-                count++;
-                stmt.addBatch();
-                if (count%1000==0){
-                    stmt.executeBatch();
-                    stmt.clearBatch();
-                }
-            }
-            if (count%1000!=0){
-                stmt.executeBatch();
-            }
-            stmt.clearBatch();
-            end = System.currentTimeMillis();
-            System.out.println(count + " records successfully loaded");
-            System.out.println("Loading speed : " + (count * 1000)/(end - start) + " records/s");
-
-            start = System.currentTimeMillis();
-            stmt = con.prepareStatement(imcourier);
-            count=0;
-            for ( Courier temp: info.couriers()) {//courier (id,name,gender,phone_number,birth_year,company_id)
-                stmt.setInt(1,temp.id());
-                stmt.setString(2,temp.name());
-                stmt.setString(3,temp.gender());
-                stmt.setString(4,temp.phoneNumber());
-                count++;
-                stmt.addBatch();
-                if (count%1000==0){
-                    stmt.executeBatch();
-                    stmt.clearBatch();
-                }
-            }
-            if (count%1000!=0){
-                stmt.executeBatch();
-            }
-            stmt.clearBatch();
-            end = System.currentTimeMillis();
-            System.out.println(count + " records successfully loaded");
-            System.out.println("Loading speed : " + (count * 1000)/(end - start) + " records/s");
-
-            start = System.currentTimeMillis();
-            stmt = con.prepareStatement(imTax_info);
-            count=0;
-            for ( TaxInfo temp: info.taxInfos()) {//tax_info (item_name,export_tax,import_tax)
-                stmt.setString(1,temp.item().name());
-                stmt.setBigDecimal(2,temp.exportRate());
-                stmt.setBigDecimal(3,temp.importRate());
-                count++;
-                stmt.addBatch();
-                if (count%1000==0){
-                    stmt.executeBatch();
-                    stmt.clearBatch();
-                }
-            }
-            if (count%1000!=0){
-                stmt.executeBatch();
-            }
-            stmt.clearBatch();
-            end = System.currentTimeMillis();
-            System.out.println(count + " records successfully loaded");
-            System.out.println("Loading speed : " + (count * 1000)/(end - start) + " records/s");
-
-            start = System.currentTimeMillis();
-            stmt = con.prepareStatement(imRoute);
-            count=0;
-            for (ItemViaCity temp: info.itemsViaCities()) {//route (item_id, retrieval_city,export_city_id,import_city_id,delivery_city_id)
-                stmt.setString(1,temp.item().name());
-                stmt.setInt(2,temp.retrievalCity().id());
-                stmt.setInt(3,temp.exportCity().id());
-                stmt.setInt(4,temp.importCity().id());
-                stmt.setInt(5,temp.deliveryCity().id());
-                count++;
-                stmt.addBatch();
-                if (count%1000==0){
-                    stmt.executeBatch();
-                    stmt.clearBatch();
-                }
-            }
-            if (count%1000!=0){
-                stmt.executeBatch();
-            }
-            stmt.clearBatch();
-            end = System.currentTimeMillis();
-            System.out.println(count + " records successfully loaded");
-            System.out.println("Loading speed : " + (count * 1000)/(end - start) + " records/s");
-
-            start = System.currentTimeMillis();
-            stmt = con.prepareStatement(imLogs);
-            count=0;
-            for ( Log temp: info.logs()) {//logs (item_name,log_time)
-                stmt.setString(1,temp.item().name());
-                stmt.setTimestamp(2,temp.logTime());
-                count++;
-                stmt.addBatch();
-                if (count%1000==0){
-                    stmt.executeBatch();
-                    stmt.clearBatch();
-                }
-            }
-            if (count%1000!=0){
-                stmt.executeBatch();
-            }
-            stmt.clearBatch();
-            end = System.currentTimeMillis();
-            System.out.println(count + " records successfully loaded");
-            System.out.println("Loading speed : " + (count * 1000)/(end - start) + " records/s");
-
-            start = System.currentTimeMillis();
-            stmt = con.prepareStatement(imRetrieve);
-            count=0;
-            for ( Retrieval temp: info.retrievals()) {//retrieve (item_name,courier_id,start_date)
-                stmt.setString(1,temp.item().name());
-                stmt.setInt(2,temp.courier().id());
-                stmt.setDate(3,temp.date());
-                count++;
-                stmt.addBatch();
-                if (count%1000==0){
-                    stmt.executeBatch();
-                    stmt.clearBatch();
-                }
-            }
-            if (count%1000!=0){
-                stmt.executeBatch();
-            }
-            stmt.clearBatch();
-            end = System.currentTimeMillis();
-            System.out.println(count + " records successfully loaded");
-            System.out.println("Loading speed : " + (count * 1000)/(end - start) + " records/s");
-
-            start = System.currentTimeMillis();
-            stmt = con.prepareStatement(imDelivery);
-            count=0;
-            for ( Delivery temp: info.deliveries()) {//delivery (item_name,courier_id,finish_date)
-                stmt.setString(1,temp.item().name());
-                stmt.setInt(2,temp.courier().id());
-                stmt.setDate(3,temp.date());
-                count++;
-                stmt.addBatch();
-                if (count%1000==0){
-                    stmt.executeBatch();
-                    stmt.clearBatch();
-                }
-            }
-            if (count%1000!=0){
-                stmt.executeBatch();
-            }
-            stmt.clearBatch();
-            end = System.currentTimeMillis();
-            System.out.println(count + " records successfully loaded");
-            System.out.println("Loading speed : " + (count * 1000)/(end - start) + " records/s");
-
-            start = System.currentTimeMillis();
-            stmt = con.prepareStatement(imExport);
-            count=0;
-            for ( Export temp: info.exports()) {//export (item_name, ship_id,container_code,export_date)
-                stmt.setString(1,temp.item().name());
-                stmt.setInt(2,temp.ship().id());
-                stmt.setString(3,temp.container().code());
-                stmt.setDate(4,temp.date());
-                count++;
-                stmt.addBatch();
-                if (count%1000==0){
-                    stmt.executeBatch();
-                    stmt.clearBatch();
-                }
-            }
-            if (count%1000!=0){
-                stmt.executeBatch();
-            }
-            stmt.clearBatch();
-            end = System.currentTimeMillis();
-            System.out.println(count + " records successfully loaded");
-            System.out.println("Loading speed : " + (count * 1000)/(end - start) + " records/s");
-
-            start = System.currentTimeMillis();
-            stmt = con.prepareStatement(imImport);
-            count=0;
-            for ( Import temp: info.imports()) {//import (item_name, import_date)
-                stmt.setString(1,temp.item().name());
-                stmt.setDate(2,temp.date());
-                count++;
-                stmt.addBatch();
-                if (count%1000==0){
-                    stmt.executeBatch();
-                    stmt.clearBatch();
-                }
-            }
-            if (count%1000!=0){
-                stmt.executeBatch();
-            }
-            stmt.clearBatch();
-            end = System.currentTimeMillis();
-            System.out.println(count + " records successfully loaded");
-            System.out.println("Loading speed : " + (count * 1000)/(end - start) + " records/s");
-
-            stmt.close();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-
-    }
-//    public <T>void insertAll(Collection<T> table,PreparedStatement stmt){
-//        for (T row : table) {
-//            stmt.set
-//        }
-//    }
-
-
-    private int insertCity(City city) {
-        String findCity = "select id FROM city where name = ?";
-        ResultSet rs;
         try {
-            PreparedStatement findCityStatement = con.prepareStatement(findCity);
-            findCityStatement.setString(1, city.name());
-            rs = findCityStatement.executeQuery();
-            if (!rs.next()) {
-                String insertCity = "insert into city (id, name) values (?, ?)";
-                PreparedStatement insertCityStatement = con.prepareStatement(insertCity);
+            String imItem = "insert into item (name, type, price) " +
+                    "values (?, ?, ?)";
+            PreparedStatement itemStm = con.prepareStatement(imItem);
+            insertData(itemStm, info.items(), (stm, item) -> {
+                try {
+                    stm.setString(1, item.name());
+                    stm.setString(2, item.type());
+                    stm.setInt(3, item.price());
+                } catch (SQLException e) {
+                    throw new RuntimeException("Wrong parameter!", e);
+                }
+            });
 
-                int id = getIdFrom("city");
-                insertCityStatement.setInt(1, id);
-                insertCityStatement.setString(2, city.name());
-                insertCityStatement.executeUpdate();
-                return id;
-            }
-            else {
-                return rs.getInt(1);
-            }
+            String imCity = "insert into city (id, area_code, name) " +
+                    "values (?, ?, ?)";
+            PreparedStatement cityStm = con.prepareStatement(imCity);
+            insertData(cityStm, info.cities(), (stm, city) -> {
+                try {
+                    stm.setInt(1,city.id());
+                    stm.setString(2,city.areaCode());
+                    stm.setString(3,city.name());;
+                } catch (SQLException e) {
+                    throw new RuntimeException("Wrong parameter!", e);
+                }
+            });
+
+            String imCompany="insert into company (id, name) " +
+                    "values (?, ?)";
+            PreparedStatement companyStm = con.prepareStatement(imCompany);
+            insertData(companyStm, info.companies(), (stm, company) -> {
+                try {
+                    stm.setInt(1,company.id());
+                    stm.setString(2,company.name());
+                } catch (SQLException e) {
+                    throw new RuntimeException("Wrong parameter!", e);
+                }
+            });
+
+            String imContainer="insert into container (code, type) " +
+                    "values (?, ?)";
+            PreparedStatement containerStm = con.prepareStatement(imContainer);
+            insertData(containerStm, info.containers(), (stm, container) -> {
+                try {
+                    stm.setString(1,container.code());
+                    stm.setString(2,container.type());
+                } catch (SQLException e) {
+                    throw new RuntimeException("Wrong parameter!", e);
+                }
+            });
+
+            String imShip="insert into ship (id, name, company_id) " +
+                    "values (?, ?, ?)";
+            PreparedStatement shipStm = con.prepareStatement(imShip);
+            insertData(shipStm, info.ships(), (stm, ship) -> {
+                try {
+                    stm.setInt(1,ship.id());
+                    stm.setString(2,ship.name());
+                    stm.setInt(3,ship.company().id());
+                } catch (SQLException e) {
+                    throw new RuntimeException("Wrong parameter!", e);
+                }
+            });
+
+            String imCourier="insert into courier (id, name ,gender, phone_number, birthday, company_id) " +
+                    "values (?, ?, ?, ?, ?, ?)";
+            PreparedStatement courierStm = con.prepareStatement(imCourier);
+            insertData(courierStm, info.couriers(), (stm, courier) -> {
+                try {
+                    stm.setInt(1,courier.id());
+                    stm.setString(2,courier.name());
+                    stm.setString(3,courier.gender());
+                    stm.setString(4,courier.phoneNumber());
+                    stm.setDate(5,Date.valueOf(courier.birthday()));
+                    stm.setInt(6,courier.company().id());
+                } catch (SQLException e) {
+                    throw new RuntimeException("Wrong parameter!", e);
+                }
+            });
+
+            String imTax_info="insert into tax_info (item_name,export_tax,import_tax) " +
+                    "values (?, ?, ?)";
+            PreparedStatement tax_infoStm = con.prepareStatement(imTax_info);
+            insertData(tax_infoStm, info.taxInfos(), (stm, tax_info) -> {
+                try {
+                    stm.setString(1,tax_info.item().name());
+                    stm.setBigDecimal(2,tax_info.exportRate());
+                    stm.setBigDecimal(3,tax_info.importRate());
+                } catch (SQLException e) {
+                    throw new RuntimeException("Wrong parameter!", e);
+                }
+            });
+
+            String imRoute="insert into item_via_city (item_name, retrieval_city," +
+                    "export_city_id, import_city_id, delivery_city_id) " +
+                    "values (?, ?, ?, ?, ?)";
+            PreparedStatement routeStm = con.prepareStatement(imRoute);
+            insertData(routeStm, info.itemsViaCities(), (stm, route) -> {
+                try {
+                    stm.setString(1, route.item().name());
+                    stm.setInt(2, route.retrievalCity().id());
+                    stm.setInt(3, route.exportCity().id());
+                    stm.setInt(4, route.importCity().id());
+                    stm.setInt(5, route.deliveryCity().id());
+                } catch (SQLException e) {
+                    throw new RuntimeException("Wrong parameter!", e);
+                }
+            });
+
+            String imLogs="insert into logs (item_name, log_time) " +
+                    "values (?, ?)";
+            PreparedStatement logsStm = con.prepareStatement(imLogs);
+            insertData(logsStm, info.logs(), (stm, logs) -> {
+                try {
+                    stm.setString(1, logs.item().name());
+                    stm.setTimestamp(2, Timestamp.valueOf(logs.logTime()));
+                } catch (SQLException e) {
+                    throw new RuntimeException("Wrong parameter!", e);
+                }
+            });
+
+            String imRetrieve="insert into retrieve (item_name, courier_id, start_date) " +
+                    "values (?, ?, ?)";
+            PreparedStatement retrieveStm = con.prepareStatement(imRetrieve);
+            insertData(retrieveStm, info.retrieves(), (stm, retrieve) -> {
+                try {
+                    stm.setString(1, retrieve.item().name());
+                    stm.setInt(2, retrieve.courier().id());
+                    stm.setDate(3, Date.valueOf(retrieve.date()));
+                } catch (SQLException e) {
+                    throw new RuntimeException("Wrong parameter!", e);
+                }
+            });
+
+            String imDelivery="insert into delivery (item_name, courier_id, finish_date) " +
+                    "values (?, ?, ?)";
+            PreparedStatement deliveryStm = con.prepareStatement(imDelivery);
+            insertData(deliveryStm, info.deliveries(), (stm, delivery) -> {
+                try {
+                    stm.setString(1, delivery.item().name());
+                    stm.setInt(2, delivery.courier().id());
+                    stm.setDate(3, Date.valueOf(delivery.date()));
+                } catch (SQLException e) {
+                    throw new RuntimeException("Wrong parameter!", e);
+                }
+            });
+
+            String imExport="insert into export (item_name, ship_id, container_code, export_date) " +
+                    "values (?, ?, ?, ?)";
+            PreparedStatement exportStm = con.prepareStatement(imExport);
+            insertData(exportStm, info.exports(), (stm, export) -> {
+                try {
+                    stm.setString(1, export.item().name());
+                    stm.setInt(2, export.ship().id());
+                    stm.setString(3, export.container().code());
+                    stm.setDate(4, Date.valueOf(export.date()));
+                } catch (SQLException e) {
+                    throw new RuntimeException("Wrong parameter!", e);
+                }
+            });
+
+            String imImport="insert into import (item_name, import_date) " +
+                    "values (?, ?)";
+            PreparedStatement importStm = con.prepareStatement(imImport);
+            insertData(importStm, info.imports(), (stm, import1) -> {
+                try {
+                    stm.setString(1, import1.item().name());
+                    stm.setDate(2, Date.valueOf(import1.date()));
+                } catch (SQLException e) {
+                    throw new RuntimeException("Wrong parameter!", e);
+                }
+            });
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private int getIdFrom(String table) throws SQLException {
-        String maxId = "select max(id) from " + table;
-        PreparedStatement maxCityIdStatement = con.prepareStatement(maxId);
-        ResultSet maxIdResult = maxCityIdStatement.executeQuery();
-        int id;
-        if (!maxIdResult.next()) {
-            id = 0;
-        } else {
-            id = maxIdResult.getInt(1) + 1;
+    private <T> void insertData(PreparedStatement statement, Collection<T> data,
+                                BiConsumer<PreparedStatement, T> setPara) {
+        long start;
+        start = System.currentTimeMillis();
+        int count = 0;
+        try{
+            for (T t: data) {
+                setPara.accept(statement, t);
+                count++;
+                statement.addBatch();
+                if (count % 1000 == 0){
+                    statement.executeBatch();
+                    statement.clearBatch();
+                }
+            }
+            if (count % 1000 != 0){
+                statement.executeBatch();
+            }
+            statement.clearBatch();
+            statement.close();
+        } catch (SQLException exception) {
+            exception.printStackTrace();
         }
-        return id;
+
+        long time = System.currentTimeMillis() - start;
+        String tableName =  data.iterator().next().getClass().getSimpleName();
+        Logger.log(count + " records successfully loaded into " + tableName + " in " + time + " ms" +
+                ", loading speed : " + count/time + " records/ms");
     }
 
     @Override

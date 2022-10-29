@@ -31,7 +31,7 @@ public class ImportData {
         List<Item> items = new ArrayList<>();
         List<ItemViaCity> itemsViaCities = new ArrayList<>();
         List<Log> logs = new ArrayList<>();
-        List<Retrieval> retrievals = new ArrayList<>();
+        List<Retrieve> retrieves = new ArrayList<>();
         Map<String, Ship> ships = new HashMap<>();
         int shipId = 1;
         List<TaxInfo> taxInfos = new ArrayList<>();
@@ -96,7 +96,7 @@ public class ImportData {
                     couriers.put(retrievalPhone, courier);
                 }
 
-                retrievals.add(new Retrieval(item,
+                retrieves.add(new Retrieve(item,
                         LocalDate.parse(info[RetrievalStartTime]), courier));
 
                 //export
@@ -143,28 +143,29 @@ public class ImportData {
         }
         return new TableInfo(cities.values(), companies.values(), containers.values(),
                 couriers.values(), deliveries, exports, imports,
-                items, itemsViaCities, logs, retrievals, ships.values(), taxInfos);
+                items, itemsViaCities, logs, retrieves, ships.values(), taxInfos);
     }
 
     public static void main(String[] args) {
         //DatabaseMsg.setStream(null);
         Logger.setStream(System.out);
+        IDataOperator sqlOperator = new SQLDataOperator();
+        sqlOperator.initialize();
+        IDataOperator fileOperator = new FileDataOperator();
+        fileOperator.initialize();
 
         System.out.println("Loading data...");
         TableInfo info = importData();
         System.out.println("Successfully import data into memory");
+
         System.out.println("Start to insert data into database via sql");
         long sqlStart = System.currentTimeMillis();
-        IDataOperator sqlOperator = new SQLDataOperator();
-        //sqlOperator.initialize();
         sqlOperator.importData(info);
         System.out.println("Insert data into database via sql finished，time cost: "
                 + (System.currentTimeMillis() - sqlStart) + "ms");
 
-        System.out.println("Start to insert data into database via file");
         long fileStart = System.currentTimeMillis();
-        IDataOperator fileOperator = new FileDataOperator();
-        fileOperator.initialize();
+        System.out.println("Start to insert data into database via file");
         fileOperator.importData(info);
         System.out.println("Insert data into database via file finished，time cost: "
                 + (System.currentTimeMillis() - fileStart) + "ms");

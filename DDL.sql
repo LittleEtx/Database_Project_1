@@ -10,7 +10,7 @@ create table company(
 
 create table city(
     id int primary key ,
-    area_code int unique,
+    area_code varchar unique,
     name varchar unique
 );
 
@@ -29,8 +29,8 @@ create table courier(
     id int primary key ,
     name varchar,
     gender varchar,
-    phone_number varchar,
-   birth_year numeric(4),
+    phone_number varchar unique,
+    birthday date,
     company_id int references company(id)
 );
 
@@ -41,7 +41,7 @@ create table tax_info(
 );
 
 
-create table route(
+create table item_via_city(
     item_name varchar primary key references item(name),
     retrieval_city int references city(id),
     export_city_id int references city(id),
@@ -67,7 +67,7 @@ create table delivery(
 );
 
 create table export(
-     item_name varchar primary key references item(name),
+    item_name varchar primary key references item(name),
     ship_id int references ship(id),
     container_code varchar references container(code),
     export_date date
@@ -75,5 +75,5 @@ create table export(
 
 create table import(
     item_name varchar primary key references item(name),
-     import_date date
+    import_date date
 );
