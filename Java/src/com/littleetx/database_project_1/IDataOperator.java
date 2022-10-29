@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface IDataOperator {
     void initialize();
-    void importData(TableInfo info);
+    void importData(TableInfo info, long packageSize);
     void delete(List<Item> itemList);
     void updateItemType(String oldType, String newType);
     List<Item> findUnfinishedItems();

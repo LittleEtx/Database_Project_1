@@ -53,8 +53,21 @@ public class SQLDataOperator implements IDataOperator {
         }
     }
 
+    public void resetTables() {
+        try (Statement stmt = con.createStatement()) {
+            stmt.executeUpdate("DROP TABLE IF EXISTS items");
+            stmt.executeUpdate("CREATE TABLE items (name VARCHAR(255), type VARCHAR(255), price INTEGER)");
+        } catch (SQLException e) {
+            System.err.println("Database reset failed");
+            System.err.println(e.getMessage());
+            System.exit(1);
+        }
+    }
+
+    private long packageSize;
     @Override
-    public void importData(TableInfo info){
+    public void importData(TableInfo info, long packageSize) {
+        this.packageSize = packageSize;
         try {
             String imItem = "insert into item (name, type, price) " +
                     "values (?, ?, ?)";
@@ -243,12 +256,12 @@ public class SQLDataOperator implements IDataOperator {
                 setPara.accept(statement, t);
                 count++;
                 statement.addBatch();
-                if (count % 1000 == 0){
+                if (count % packageSize == 0){
                     statement.executeBatch();
                     statement.clearBatch();
                 }
             }
-            if (count % 1000 != 0){
+            if (count % packageSize != 0){
                 statement.executeBatch();
             }
             statement.clearBatch();
@@ -260,12 +273,51 @@ public class SQLDataOperator implements IDataOperator {
         long time = System.currentTimeMillis() - start;
         String tableName =  data.iterator().next().getClass().getSimpleName();
         Logger.log(count + " records successfully loaded into " + tableName + " in " + time + " ms" +
-                ", loading speed : " + count/time + " records/ms");
+                ", loading speed : " + String.format("%.4f", ((double) count)/time) + " records/ms");
     }
 
     @Override
     public void delete(List<Item> itemList) {
+        try {
+            String dlExport = "delete from export where item_name in (?)";
+            deleteFrom(con.prepareStatement(dlExport), itemList);
 
+            String dlImport = "delete from import where item_name in (?)";
+            deleteFrom(con.prepareStatement(dlImport), itemList);
+
+            String dlDelivery = "delete from delivery where item_name in (?)";
+            deleteFrom(con.prepareStatement(dlDelivery), itemList);
+
+            String dlRetrieve = "delete from retrieve where item_name in (?)";
+            deleteFrom(con.prepareStatement(dlRetrieve), itemList);
+
+            String dlRoute = "delete from item_via_city where item_name in (?)";
+            deleteFrom(con.prepareStatement(dlRoute), itemList);
+
+            String dlTaxInfo = "delete from tax_info where item_name in (?)";
+            deleteFrom(con.prepareStatement(dlTaxInfo), itemList);
+
+            String dlLog = "delete from logs where item_name in (?)";
+            deleteFrom(con.prepareStatement(dlLog), itemList);
+
+            String dlItem = "delete from item where name in (?)";
+            deleteFrom(con.prepareStatement(dlItem), itemList);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void deleteFrom(PreparedStatement stm, List<Item> itemList) {
+        try {
+            for (Item item : itemList) {
+                stm.setString(1, item.name());
+                stm.executeUpdate();
+                stm.clearBatch();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

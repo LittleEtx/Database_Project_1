@@ -4,6 +4,7 @@ import com.littleetx.database_project_1.*;
 import com.littleetx.database_project_1.file_database.FileOperator;
 import com.littleetx.database_project_1.file_database.FileOperator_CSV;
 import com.littleetx.database_project_1.records.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.FileNotFoundException;
 import java.math.BigDecimal;
@@ -16,6 +17,8 @@ import static com.littleetx.database_project_1.DataIndexMapping.*;
 public class ImportData {
 
     private static final String DataFile = "data.csv";
+    private static final int dataSize = 500000;
+    private static final long packageSize = 100;
 
     public static TableInfo importData() {
         Map<String, City> cities = new HashMap<>();
@@ -37,10 +40,11 @@ public class ImportData {
         List<TaxInfo> taxInfos = new ArrayList<>();
 
         FileOperator fileOperator = new FileOperator_CSV(DataFile);
+        int count = 0;
         try {
             Iterator<String[]> reader = fileOperator.getReader().iterator();
             reader.next();
-            while (reader.hasNext()) {
+            while (reader.hasNext() && ++count <= dataSize) {
                 String[] info = reader.next();
                 Item item = new Item(info[ItemName],
                         info[ItemType], Integer.parseInt(info[ItemPrice]));
@@ -147,26 +151,41 @@ public class ImportData {
     }
 
     public static void main(String[] args) {
-        //DatabaseMsg.setStream(null);
+        TableInfo info = getTableInfo();
         Logger.setStream(System.out);
-        IDataOperator sqlOperator = new SQLDataOperator();
-        sqlOperator.initialize();
-        IDataOperator fileOperator = new FileDataOperator();
-        fileOperator.initialize();
+        System.out.println("Import data with package size: " + packageSize);
 
+        loadIntoSQL(info);
+        loadInfoFile(info);
+    }
+
+    @NotNull
+    private static TableInfo getTableInfo() {
         System.out.println("Loading data...");
         TableInfo info = importData();
-        System.out.println("Successfully import data into memory");
+        System.out.println("Successfully import " + dataSize + " records into memory");
+        return info;
+    }
+
+    public static void loadIntoSQL(TableInfo info) {
+        SQLDataOperator sqlOperator = new SQLDataOperator();
+        sqlOperator.initialize();
 
         System.out.println("Start to insert data into database via sql");
         long sqlStart = System.currentTimeMillis();
-        sqlOperator.importData(info);
+        sqlOperator.importData(info, packageSize);
         System.out.println("Insert data into database via sql finished，time cost: "
                 + (System.currentTimeMillis() - sqlStart) + "ms");
+        sqlOperator.disconnect();
+    }
+
+    private static void loadInfoFile(TableInfo info) {
+        IDataOperator fileOperator = new FileDataOperator();
+        fileOperator.initialize();
 
         long fileStart = System.currentTimeMillis();
         System.out.println("Start to insert data into database via file");
-        fileOperator.importData(info);
+        fileOperator.importData(info, packageSize);
         System.out.println("Insert data into database via file finished，time cost: "
                 + (System.currentTimeMillis() - fileStart) + "ms");
     }

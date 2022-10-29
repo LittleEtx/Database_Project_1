@@ -49,7 +49,7 @@ create table item_via_city(
      delivery_city_id int references city(id)
 );
 
-create table logs(
+create table log(
     item_name varchar primary key references item(name),
     log_time timestamp
 );

@@ -19,9 +19,10 @@ public class FileDataOperator implements IDataOperator {
         database.initialize();
     }
 
+    private long packageSize;
     @Override
-    public void importData(TableInfo info) {
-
+    public void importData(TableInfo info, long packageSize) {
+        this.packageSize = packageSize;
         insertInto("city", info.cities(), city -> new Object[] {
                 city.id(), city.name(), city.areaCode()});
         insertInto("company", info.companies(), company -> new Object[] {
@@ -59,13 +60,21 @@ public class FileDataOperator implements IDataOperator {
         Table table = database.getTable(tableName);
         Objects.requireNonNull(table);
         List<Object[]> infoList = new ArrayList<>();
+        long count = 0;
         for (T info : infos) {
             infoList.add(getField.apply(info));
+            if (++count % packageSize == 0) {
+                table.insert(infoList);
+                infoList.clear();
+            }
         }
-        table.insert(infoList);
+        if (!infoList.isEmpty()) {
+            table.insert(infoList);
+        }
         long time = System.currentTimeMillis() - t;
         Logger.log("Insert into " + tableName + " in: " + time + "ms, " +
-                "total: "  + infoList.size() + " records, speed: " + infoList.size() / time + " records/ms");
+                "total: "  + infos.size() + " records, speed: " +
+                String.format("%.4f", ((double) infos.size()) / time) + " records/ms");
     }
 
     @Override
