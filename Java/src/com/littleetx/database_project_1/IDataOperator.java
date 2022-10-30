@@ -2,9 +2,9 @@ package com.littleetx.database_project_1;
 
 import com.littleetx.database_project_1.records.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public interface IDataOperator {
@@ -19,10 +19,10 @@ public interface IDataOperator {
     }
     Collection<Item> findUnfinishedItems(FindType type);
 
-    Map<Ship, LocalDate> findShipServiceYear();
+    Map<Container, LocalDate> findContainerServiceYear();
     enum CourierType {
         Retrieval, Delivery
     }
-    Map<City, Courier> findBestCourierForCities(CourierType type);
-    Map<String, BigDecimal> getMinExportRate(Company company);
+    Map<Company, Map<City, List<Courier>>> findBestCourierForCities(CourierType type);
+    Map<Company, Map<String, List<City>>> getMinExportRate();
 }

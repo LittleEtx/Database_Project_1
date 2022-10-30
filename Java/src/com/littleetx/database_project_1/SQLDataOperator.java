@@ -8,12 +8,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.*;
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 public class SQLDataOperator implements IDataOperator {
@@ -362,14 +360,15 @@ public class SQLDataOperator implements IDataOperator {
             if (type == FindType.DeleteIfFind) {
                 PreparedStatement delivery = con.prepareStatement(
                         "select from delivery where item_name = ?");
-                for (String str : result.keySet()) {
-                    delivery.setString(1, str);
+                Iterator<String> it = result.keySet().iterator();
+                while (it.hasNext()) {
+                    delivery.setString(1, it.next());
                     ResultSet rs1 = delivery.executeQuery();
                     if (rs1.next()) {
-                        result.remove(str);
+                        it.remove();
                     }
-                    delivery.close();
                 }
+                delivery.close();
             } else {
                 PreparedStatement delivery = con.prepareStatement(
                         "select * from delivery");
@@ -386,17 +385,17 @@ public class SQLDataOperator implements IDataOperator {
     }
 
     @Override
-    public Map<Ship, LocalDate> findShipServiceYear() {
+    public Map<Container, LocalDate> findContainerServiceYear() {
         return null;
     }
 
     @Override
-    public Map<City, Courier> findBestCourierForCities(CourierType type) {
+    public Map<Company, Map<City, List<Courier>>> findBestCourierForCities(CourierType type) {
         return null;
     }
 
     @Override
-    public Map<String, BigDecimal> getMinExportRate(Company company) {
+    public Map<Company, Map<String, List<City>>> getMinExportRate() {
         return null;
     }
 
