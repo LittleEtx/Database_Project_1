@@ -5,18 +5,18 @@ create table item(
 );
 create table company(
     id int primary key ,
-    name varchar unique
+    name varchar unique not null
 );
 
 create table city(
     id int primary key ,
     area_code varchar unique,
-    name varchar unique
+    name varchar unique not null
 );
 
 create table ship(
     id int primary key,
-    name varchar unique ,
+    name varchar unique not null ,
     company_id int references company(id)
 );
 
@@ -27,7 +27,7 @@ create table container(
 
 create table courier(
     id int primary key ,
-    name varchar,
+    name varchar not null ,
     gender varchar,
     phone_number varchar unique,
     birthday date,
@@ -51,29 +51,29 @@ create table item_via_city(
 
 create table log(
     item_name varchar primary key references item(name),
-    log_time timestamp
+    log_time timestamp not null
 );
 
 create table retrieval(
     item_name varchar primary key references item(name),
-    courier_id int references courier(id),
-    start_date date
+    courier_id int references courier(id) not null ,
+    start_date date not null
 );
 
 create table delivery(
     item_name varchar primary key references item(name),
-    courier_id int references courier(id),
-    finish_date date
+    courier_id int references courier(id) not null ,
+    finish_date date not null
 );
 
 create table export(
     item_name varchar primary key references item(name),
     ship_id int references ship(id),
     container_code varchar references container(code),
-    export_date date
+    export_date date not null
 );
 
 create table import(
     item_name varchar primary key references item(name),
-    import_date date
+    import_date date not null
 );
