@@ -2,7 +2,6 @@ package com.littleetx.database_project_1.execution;
 
 import com.littleetx.database_project_1.FileDataOperator;
 import com.littleetx.database_project_1.IDataOperator;
-import com.littleetx.database_project_1.Logger;
 import com.littleetx.database_project_1.SQLDataOperator;
 
 public class UpdateData {
@@ -10,8 +9,6 @@ public class UpdateData {
     private static final String newType = "blueberry";
 
     public static void main(String[] args) {
-        Logger.setStream(System.out);
-
         update(new FileDataOperator(), "File");
         update(new SQLDataOperator(), "SQL");
     }
@@ -35,9 +32,11 @@ public class UpdateData {
                 String.format("%.4f", ((double) count) / time) + " records/s");
 
         startTime = System.currentTimeMillis();
-        System.out.println("Updating item type from " + preType + " to " + newType + "...");
-        dataOperator.updateItemType(preType, newType);
-        System.out.println("Updated in " + (System.currentTimeMillis() - startTime) + "ms, speed: " +
+        System.out.println("Updating item type from " + newType + " to " + preType + "...");
+        dataOperator.updateItemType(newType, preType);
+        time = System.currentTimeMillis() - startTime;
+        System.out.println("Updated in " + time + "ms, speed: " +
                 String.format("%.4f", ((double) count) / time) + " records/s");
+        System.out.println();
     }
 }

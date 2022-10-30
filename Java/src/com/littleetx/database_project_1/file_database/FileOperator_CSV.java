@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class FileOperator_CSV extends FileOperator {
 
@@ -13,13 +14,21 @@ public class FileOperator_CSV extends FileOperator {
     public FileOperator_CSV(@NotNull String fileName) {
         super(fileName);
     }
+    private final List<String> results = new ArrayList<>();
 
     @Override
     protected boolean hasNextRow(BufferedReader reader) {
+        if (!results.isEmpty()) {
+            return true;
+        }
+
         try {
-            return reader.ready();
+            if (!reader.ready())
+                return false;
+            getValues(reader);
+            return !results.isEmpty();
         } catch (IOException e) {
-            throw new RuntimeException("Failed to read file: " + filePath);
+            throw new RuntimeException(e);
         }
     }
 
@@ -28,7 +37,13 @@ public class FileOperator_CSV extends FileOperator {
         if (!hasNextRow(reader)) {
             throw new IllegalStateException("No more rows");
         }
-        ArrayList<String> results = new ArrayList<>();
+        String[] values = results.toArray(new String[0]);
+        results.clear();
+        return values;
+    }
+
+
+    private void getValues(BufferedReader reader) {
         boolean isInQuote = false;
         StringBuilder value = new StringBuilder();
         try {
@@ -85,7 +100,6 @@ public class FileOperator_CSV extends FileOperator {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return results.toArray(new String[0]);
     }
 
     @Override
