@@ -1,5 +1,5 @@
 
--- container
+-- Find Containers Service Year
 select container_code,case
     when maxim>maxex
 then maxim-minex
@@ -12,7 +12,7 @@ end as served_time
 group by container_code) t2;
 
 
--- retrieval
+-- Find Best retrieval Couriers
 
 with info as(select t2.name as name,city_name,company.name as company_name from
 (select name,city_name,company_id from
@@ -30,7 +30,7 @@ where (city_name,company_name,num) in
 (select name,city_name,company_name,count(*) as num from info group by name,city_name,company_name)p1
 group by city_name, company_name);
 
---delivery courier
+--Find Best delivery Couriers
 with info as(select t2.name as name,city_name,company.name as company_name from
 (select name,city_name,company_id from
 (select courier_id,city_name from
@@ -47,7 +47,7 @@ where (city_name,company_name,num) in
 (select name,city_name,company_name,count(*) as num from info group by name,city_name,company_name)p1
 group by city_name, company_name);
 
---rate
+--Find Best Item Export Cities
 
 with item_info as(
     select t6.item_name,company_name,city_name,type,price from
