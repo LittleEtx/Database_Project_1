@@ -6,6 +6,7 @@ import com.littleetx.database_project_1.records.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
@@ -284,7 +285,7 @@ public class FileDataOperator implements IDataOperator {
                         (BigDecimal) row[1], (BigDecimal) row[2])
         );
 
-        Map<Company, Map<String, Map<City, BigDecimal>>> companyMap = new HashMap<>();
+        Map<Company, Map<String, Map<City, Map<Item, BigDecimal>>>> companyMap = new HashMap<>();
         for (Company company : companies.values()) {
             companyMap.put(company, new HashMap<>());
         }
@@ -293,17 +294,18 @@ public class FileDataOperator implements IDataOperator {
                 .getTable("item_via_city")).select()) {
             String itemName = (String) row[0];
             Item item = items.get(itemName);
-            City city = cites.get((int) row[1]);
+            City city = cites.get((int) row[2]);
             var company = companyMap.get(itemCompanyMap.get(itemName));
             BigDecimal exportRate = taxInfo.get(item.name()).exportRate();
-            if (company.containsKey(item.type())) {
-                company.get(item.type()).put(city, exportRate);
-            } else {
-                Map<City, BigDecimal> cityExportRate = new HashMap<>();
-                cityExportRate.put(city, exportRate);
-                company.put(item.type(), cityExportRate);
-            }
 
+            if (!company.containsKey(item.type())) {
+                company.put(item.type(), new HashMap<>());
+            }
+            var itemType = company.get(item.type());
+            if (!itemType.containsKey(city)) {
+                itemType.put(city, new HashMap<>());
+            }
+            itemType.get(city).put(item, exportRate);
         }
 
         Map<Company, Map<String, List<City>>> result = new HashMap<>();
@@ -313,14 +315,30 @@ public class FileDataOperator implements IDataOperator {
             var companyTaxInfo = companyMap.get(company);
             //find the best cities for each type
             for (String type : companyTaxInfo.keySet()) {
-                Map<City, BigDecimal> cityExportRate = companyTaxInfo.get(type);
-                List<City> bestCities = new ArrayList<>();
+                var cityExportRate = companyTaxInfo.get(type);
+                Map<City, BigDecimal> cityRateMap = new HashMap<>();
+                //get the lowest export rate for each city
                 for (City city : cityExportRate.keySet()) {
+                    BigDecimal minRate = null;
+                    var itemRateMap = cityExportRate.get(city);
+                    for (Item item : itemRateMap.keySet()) {
+                        BigDecimal rate = itemRateMap.get(item)
+                                .divide(new BigDecimal(item.price()), 10, RoundingMode.HALF_UP);
+                        if (minRate == null || rate.compareTo(minRate) < 0) {
+                            minRate = rate;
+                        }
+                    }
+                    cityRateMap.put(city, minRate);
+                }
+
+                //find the best cities for each type of items
+                List<City> bestCities = new ArrayList<>();
+                for (City city : cityRateMap.keySet()) {
                     if (bestCities.isEmpty()) {
                         bestCities.add(city);
                     } else {
-                        BigDecimal rate = cityExportRate.get(city);
-                        BigDecimal bestRate = cityExportRate.get(bestCities.get(0));
+                        BigDecimal rate = cityRateMap.get(city);
+                        BigDecimal bestRate = cityRateMap.get(bestCities.get(0));
                         if (rate.compareTo(bestRate) < 0) {
                             bestCities.clear();
                             bestCities.add(city);
@@ -333,8 +351,6 @@ public class FileDataOperator implements IDataOperator {
             }
             result.put(company, itemCityMap);
         }
-
-
         return result;
     }
 

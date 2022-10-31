@@ -1,6 +1,5 @@
-# Database_Project_1
-the first project for Principles of Database Systems
+# Database Project 1
+The report doc can be found in https://docs.qq.com/doc/DU1pWU3lHTmxOSmFR
 
-finish DDL
-
-correct some mistakes in ER_diagram ,saved as "ER graph_edit"
+To set the environment in IntelliJ, the dictionary /Java/ needs to
+be set as a module, and add the .jar files in the /lib/ to the library.

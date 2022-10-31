@@ -22,12 +22,13 @@ public class GetMinExportRate {
         System.out.println("Found " + result.size() + " records in " + time + "ms, speed: " +
                 String.format("%.4f", ((double) result.size()) / time) + " records/s");
 
-        //insertIntoFile(result);
+        insertIntoFile(result);
     }
 
     private static void insertIntoFile(Map<Company, Map<String, List<City>>> result) {
-        FileOperator output = new FileOperator_CSV("results/GetMinExportRate.csv");
+        FileOperator output = new FileOperator_CSV("results/GetMinExportRate2.csv");
         List<String[]> results = new ArrayList<>();
+        results.add(new String[]{"CompanyName", "ItemType", "CityName"});
         for (Company company : result.keySet()) {
             var companyTax = result.get(company);
             for (String type : companyTax.keySet()) {
